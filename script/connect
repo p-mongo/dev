@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+KEY=$HOME/.ssh/mongo-default.pem
+
+instance="$1"
+
+if test -n "$instance"; then
+  shift
+else
+  instance=`cat .host`
+fi
+
+if test -z "$instance"; then
+  echo "Usage: `basename $0` host-or-ip" 1>&2
+  exit 4
+fi
+
+exec ssh -i $KEY -l ec2-user $instance "$@"

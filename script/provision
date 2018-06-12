@@ -1,0 +1,89 @@
+#!/bin/sh
+
+set -e
+
+KEY=$HOME/.ssh/mongo-default.pem
+
+instance="$1"
+
+if test -z "$instance"; then
+  echo "Usage: `basename $0` host-or-ip" 1>&2
+  exit 4
+fi
+
+shift
+
+if test $instance = -r; then
+  instance=`cat .host`
+  
+  if test -z "$instance"; then
+    echo "No instance to resume provisioning of" 1>&2
+    exit 4
+  fi
+else
+  echo $instance >.host
+fi
+
+run() {
+  ssh -i $KEY -l ec2-user $instance "$@"
+}
+
+run 'sudo tee /etc/yum.repos.d/mongodb-org-3.6.repo' <<E
+[mongodb-org-3.6]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/3.6/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.6.asc
+E
+
+run 'sudo yum install -y zsh git mongodb-org gcc openssl-devel readline-devel zlib-devel bzip2'
+
+run 'sudo usermod -s /bin/zsh root && sudo usermod -s /bin/zsh $USER'
+
+run 'cat >.zshenv' <<'E'
+  # GENERATED FILE - DO NOT EDIT
+  if test -d "$HOME/.rbenv/bin"; then
+    export PATH="$HOME/.rbenv/bin:$PATH"
+  fi
+
+  # Looks like redhat/amazon broke their zsh to not read .zshrc always
+  have() {
+    which "$@" >/dev/null 2>&1
+  }
+
+  if have rbenv; then
+    eval "$(rbenv init -)"
+  fi
+
+  rbenv shell 2.5.1
+E
+
+run 'cat >.zshrc' <<'E'
+  # GENERATED FILE - DO NOT EDIT
+  
+  HISTFILE=~/.histfile
+  HISTSIZE=1000
+  SAVEHIST=1000
+  bindkey -e
+E
+
+run <<E
+  mkdir -p apps &&
+  cd apps &&
+  if test -e pubfiles; then
+    cd pubfiles &&
+    git fetch origin &&
+    git checkout master &&
+    git reset --hard origin/master &&
+    cd ..;
+  else
+    git clone https://github.com/p/pubfiles;
+  fi &&
+  cd pubfiles &&
+  ./script/install-rbenv
+E
+
+run <<E
+  rbenv shell 2.5.1 || rbenv install 2.5.1
+E
