@@ -66,6 +66,8 @@ run 'cat >.zshrc' <<'E'
   HISTSIZE=1000
   SAVEHIST=1000
   bindkey -e
+  
+  . ~/apps/pubfiles/home/zshrc.ruby
 E
 
 run <<E
@@ -80,10 +82,15 @@ run <<E
   else
     git clone https://github.com/p/pubfiles;
   fi &&
+  (test -e dev || git clone https://github.com/p-mongo/dev) &&
   cd pubfiles &&
   ./script/install-rbenv
 E
 
 run <<E
   rbenv shell 2.5.1 || rbenv install 2.5.1
+E
+
+run <<E
+  bundle -h >/dev/null 2>&1 || gem install bundler --no-ri --no-rdoc
 E
