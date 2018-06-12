@@ -41,34 +41,42 @@ run 'sudo yum install -y zsh git mongodb-org gcc openssl-devel readline-devel zl
 
 run 'sudo usermod -s /bin/zsh root && sudo usermod -s /bin/zsh $USER'
 
-run 'cat >.zshenv' <<'E'
-  # GENERATED FILE - DO NOT EDIT
-  if test -d "$HOME/.rbenv/bin"; then
-    export PATH="$HOME/.rbenv/bin:$PATH"
-  fi
+install_zsh_config() {
+  run 'cat >.zshenv' <<'E'
+    # GENERATED FILE - DO NOT EDIT
+    if test -d "$HOME/.rbenv/bin"; then
+      export PATH="$HOME/.rbenv/bin:$PATH"
+    fi
+    
+    export PATH=$PATH:$HOME/.local/bin
 
-  # Looks like redhat/amazon broke their zsh to not read .zshrc always
-  have() {
-    which "$@" >/dev/null 2>&1
-  }
+    # Looks like redhat/amazon broke their zsh to not read .zshrc always
+    have() {
+      which "$@" >/dev/null 2>&1
+    }
 
-  if have rbenv; then
-    eval "$(rbenv init -)"
-  fi
+    if have rbenv; then
+      eval "$(rbenv init -)"
+    fi
 
-  rbenv shell 2.5.1
+    rbenv shell 2.5.1
+    
+    . ~/apps/pubfiles/home/zshrc.node
 E
 
-run 'cat >.zshrc' <<'E'
-  # GENERATED FILE - DO NOT EDIT
-  
-  HISTFILE=~/.histfile
-  HISTSIZE=1000
-  SAVEHIST=1000
-  bindkey -e
-  
-  . ~/apps/pubfiles/home/zshrc.ruby
+  run 'cat >.zshrc' <<'E'
+    # GENERATED FILE - DO NOT EDIT
+    
+    HISTFILE=~/.histfile
+    HISTSIZE=1000
+    SAVEHIST=1000
+    bindkey -e
+    
+    . ~/apps/pubfiles/home/zshrc.ruby
 E
+}
+
+install_zsh_config
 
 run <<E
   mkdir -p apps &&
@@ -83,19 +91,36 @@ run <<E
     git clone https://github.com/p/pubfiles;
   fi &&
   (test -e dev || git clone https://github.com/p-mongo/dev) &&
+  pip install --user 'mtools[all]' &&
   cd pubfiles &&
-  ./script/install-rbenv
+  ./script/install-rbenv &&
+  ./script/install-nvm &&
+  ./script/install
 E
 
+# and again since script/install overwrites stuff
+install_zsh_config
+
 run <<E
-  rbenv shell 2.5.1 || rbenv install 2.5.1
+  (rbenv shell 2.5.1 || rbenv install 2.5.1) &&
+  nvm install stable
 E
 
 run <<E
   (bundle -h >/dev/null 2>&1 || gem install bundler --no-ri --no-rdoc) &&
+  npm install -g m &&
+  sudo mkdir -p /usr/local/m &&
+  sudo chown ec2-user:ec2-user /usr/local/m &&
   if ! test -d /var/mongodb; then
     sudo mkdir /var/mongodb &&
     sudo mount -t tmpfs -o size=1500m none /var/mongodb;
   fi &&
   sudo chown ec2-user /var/mongodb
+E
+
+# zsh seems to use more for pager regardless of PAGER setting
+run <<E
+  sudo rm /bin/more &&
+  (echo '#!/bin/sh'; echo 'exec less "\$@"') |sudo tee /bin/more &&
+  sudo chmod 0755 /bin/more
 E
