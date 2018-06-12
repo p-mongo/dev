@@ -92,5 +92,10 @@ run <<E
 E
 
 run <<E
-  bundle -h >/dev/null 2>&1 || gem install bundler --no-ri --no-rdoc
+  (bundle -h >/dev/null 2>&1 || gem install bundler --no-ri --no-rdoc) &&
+  if ! test -d /var/mongodb; then
+    sudo mkdir /var/mongodb &&
+    sudo mount -t tmpfs -o size=1500m none /var/mongodb;
+  fi &&
+  sudo chown ec2-user /var/mongodb
 E
