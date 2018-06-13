@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+mlaunch --replicaset --dir /var/mongodb/4.0-rs --name ruby-driver-rs \
+  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 \
+  --binarypath /usr/local/m/versions/4.0.0-rc5/bin --port 27100
+
+# MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs 
