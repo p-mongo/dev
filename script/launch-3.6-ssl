@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+mlaunch --single --dir /var/mongodb/ssl --name ruby-driver-rs \
+  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27400 \
+  --sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
