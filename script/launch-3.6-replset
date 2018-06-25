@@ -3,4 +3,4 @@
 set -e
 
 mlaunch --replicaset --dir /var/mongodb/replset --name ruby-driver-rs \
-  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27000
+  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27000 "$@"
