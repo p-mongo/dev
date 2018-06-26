@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+dir=/var/mongodb/2.6-rs
+
+if test -d $dir; then
+  mlaunch start --dir $dir
+else
+  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
+    --setParameter enableTestCommands=1 \
+    --binarypath /usr/local/m/versions/2.6.12/bin --port 27200 "$@"
+fi
+
+# MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs
