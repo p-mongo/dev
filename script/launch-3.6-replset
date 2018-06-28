@@ -2,5 +2,8 @@
 
 set -e
 
-mlaunch --replicaset --dir /var/mongodb/replset --name ruby-driver-rs \
-  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27000 "$@"
+dir=/var/mongodb/3.6-rs
+
+mlaunch --replicaset --dir $dir --name ruby-driver-rs \
+  --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 \
+    --binarypath /usr/local/m/versions/3.6.5/bin --port 27000 "$@"
