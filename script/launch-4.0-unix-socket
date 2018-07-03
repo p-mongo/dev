@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+dir=/var/mongodb/4.0-unix-socket
+
+#sudo mkdir -p /var/run/m
+#sudo chown `id -u`:`id -g` /var/run/m
+
+if test -d $dir; then
+  mlaunch start --dir $dir
+else
+  mlaunch --single --dir $dir --name ruby-driver-rs \
+    --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 \
+    --binarypath /usr/local/m/versions/4.0.0-rc6/bin --port 27090 --unixSocketPrefix /var/run/m "$@"
+fi
