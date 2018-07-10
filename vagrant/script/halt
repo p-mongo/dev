@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+$: << 'lib'
+require 'manager'
+
+Manager.new.halt(ARGV.shift)
