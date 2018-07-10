@@ -38,6 +38,7 @@ T
     end
 
     run(which, %w(vagrant up))
+    provision(which)
     run(which, %w(vagrant ssh))
   end
 
@@ -68,5 +69,16 @@ T
 
   private def share_path
     File.expand_path(File.join(File.dirname(__FILE__), '..', 'share'))
+  end
+
+  def provision(which)
+    if which =~ /debian/
+      run(which, %w(vagrant ssh -c) + [<<T])
+if ! grep -q non-free /etc/apt/sources.list; then
+  sudo sed -i -e s/' main/ main contrib non-free'/ /etc/apt/sources.list
+fi &&
+sudo apt-get update
+T
+    end
   end
 end
