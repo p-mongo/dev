@@ -14,9 +14,13 @@ T
   end
 
   DISTROS = {
+    'debian71' => "bento/debian-7.1",
+    'debian81' => "bento/debian-8.1",
     'debian92' => "bento/debian-9.2",
     'ubuntu1404' => "bento/ubuntu-14.04",
     'ubuntu1604' => "bento/ubuntu-16.04",
+    'opensuse13' => 'bento/opensuse-13.2-x86_64',
+    'centos75' => 'bento/centos-7.5',
   }
 
   private def resolve(which)
