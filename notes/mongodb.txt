@@ -1,0 +1,4 @@
+Memory usage:
+https://dba.stackexchange.com/questions/148395/mongodb-using-too-much-memory
+https://www.percona.com/blog/2015/07/01/using-cgroups-to-limit-mysql-and-mongodb-memory-usage/
+https://docs.mongodb.com/manual/faq/storage/
