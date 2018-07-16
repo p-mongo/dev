@@ -1,0 +1,88 @@
+#!/usr/bin/env ruby
+
+require 'socket'
+require 'fileutils'
+require 'childprocess'
+
+class Runner
+  def initialize(concurrency:)
+    @concurrency = concurrency
+  end
+
+  attr_reader :concurrency
+
+  def run
+    start_clusters
+    run_tests
+  end
+
+  def start_clusters
+    1.upto(concurrency) do |i|
+      socket_path = "/tmp/mongodb-#{27400+i*10}.sock"
+
+      if File.exist?(socket_path)
+        begin
+          UNIXSocket.new(socket_path)
+        rescue Errno::EACCES
+          sudo_chmod('0666', socket_path)
+          retry
+        rescue Errno::ECONNREFUSED
+          # fall through to launching
+        else
+          chmod_sockets(i)
+          next
+        end
+      end
+
+      dir = "/var/mongodb/4.0-rsp-#{i}"
+      if File.exist?(dir)
+        cmd = mlaunch_cmd + ['start', '--dir', dir]
+      else
+        cmd = mlaunch_cmd + ['init', '--replicaset', '--name', replica_set_name,
+          '--wiredTigerCacheSizeGB', '1', '--setParameter', 'enableTestCommands=1',
+          '--binarypath', '/usr/local/m/versions/4.0.0-rc6/bin',
+          '--port', (27400+i*10).to_s, '--dir', dir]
+      end
+      check_call(cmd)
+      chmod_sockets(i)
+    end
+  end
+
+  def chmod_sockets(i)
+    0.upto(2) do |j|
+      socket_path = "/tmp/mongodb-#{27400+i*10+j}.sock"
+      unless File.exist?(socket_path)
+        raise "Missing socket at #{socket_path}"
+      end
+      sudo_chmod('0666', socket_path)
+    end
+  end
+
+  def run_tests
+  end
+
+  def replica_set_name
+    'psrs'
+  end
+
+  def mlaunch_cmd
+    %w(sudo -iu m mlaunch)
+  end
+
+  def sudo_chmod(mode, path)
+    check_call(['sudo', 'chmod', mode.to_s, path])
+  end
+
+  def check_call(cmd)
+  p cmd
+    p = ChildProcess.new(*cmd)
+    p.io.inherit!
+    p.start
+    p.wait
+    unless p.exit_code == 0
+      raise "Failed to execute: #{cmd}"
+    end
+  end
+end
+
+Runner.new(concurrency: 2).run
