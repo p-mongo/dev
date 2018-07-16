@@ -63,8 +63,11 @@ class Runner
   def run_tests
     cfg = generate_config
     #byebug
-    check_call(%w(bundle exec parallel_rspec spec) +
-      ['-n', concurrency.to_s], env: {'PARALLEL_CONFIGS' => cfg})
+    cmd = %w(bundle exec parallel_rspec) +
+      ['-n', concurrency.to_s] +
+      %w(-- -f progress --) +
+      %w(spec)
+    check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
 
   def generate_config
