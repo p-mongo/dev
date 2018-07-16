@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'byebug'
+require 'json'
 require 'socket'
 require 'fileutils'
 require 'childprocess'
@@ -59,6 +61,20 @@ class Runner
   end
 
   def run_tests
+    cfg = generate_config
+    #byebug
+    check_call(%w(bundle exec parallel_rspec spec) +
+      ['-n', concurrency.to_s], env: {'PARALLEL_CONFIGS' => cfg})
+  end
+
+  def generate_config
+    m = {}
+    1.upto(concurrency).each do |i|
+      m[i] = {
+        'MONGODB_URI' => "mongodb://localhost:#{27400+i*10},localhost:#{27401+i*10},localhost:#{27402+i*10}/?replicaSet=#{replica_set_name}",
+      }
+    end
+    m.to_json
   end
 
   def replica_set_name
@@ -73,16 +89,20 @@ class Runner
     check_call(['sudo', 'chmod', mode.to_s, path])
   end
 
-  def check_call(cmd)
-  p cmd
-    p = ChildProcess.new(*cmd)
-    p.io.inherit!
-    p.start
-    p.wait
-    unless p.exit_code == 0
+  def check_call(cmd, env: nil)
+    process = ChildProcess.new(*cmd)
+    process.io.inherit!
+    if env
+      env.each do |k, v|
+        process.environment[k.to_s] = v
+      end
+    end
+    process.start
+    process.wait
+    unless process.exit_code == 0
       raise "Failed to execute: #{cmd}"
     end
   end
 end
 
-Runner.new(concurrency: 2).run
+Runner.new(concurrency: 6).run
