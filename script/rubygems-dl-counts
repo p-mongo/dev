@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+require 'faraday'
+require 'fileutils'
+require 'addressable'
+require 'byebug'
+require 'nokogiri'
+require 'open-uri'
+
+class Counter
+  INDEX_URL = 'https://s3-us-west-2.amazonaws.com/rubygems-dumps/?prefix=production/public_postgresql'
+
+  def base_url
+    Addressable::URI.parse(INDEX_URL)
+  end
+
+  def dump_urls
+    c = open(INDEX_URL).read
+    # XML doesn't work for some reason
+    doc = Nokogiri::HTML(c)
+    urls = []
+    doc.xpath('//key').each do |elt|
+      urls << base_url.join(elt.text.to_s.strip)
+    end
+    urls
+  end
+
+  def run
+    FileUtils.mkdir_p('rubygems-dumps')
+    dump_urls.each do |dump_url|
+      puts "Found #{dump_url}"
+      bn = File.basename(dump_url)
+      unless File.exist?(dest_path = File.join('rubygems-dumps', bn))
+        puts "Download #{dump_url}"
+        begin
+          File.open(tmp_path = dest_path + '.tmp', 'w') do |f|
+            remote = open(dump_url, 'User-agent' => 'helloworld/1.0')
+            while chunk = remote.read(65536)
+              f << chunk
+            end
+          end
+        rescue
+          FileUtils.rm_f(tmp_path)
+          puts "Failed"
+        end
+      end
+    end
+  end
+end
+
+Counter.new.run
