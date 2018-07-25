@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+#require 'activerecord/postgresql_adapter'
+require 'active_record'
+require 'tempfile'
 require 'childprocess'
 require 'faraday'
 require 'fileutils'
@@ -8,7 +11,30 @@ require 'byebug'
 require 'nokogiri'
 require 'open-uri'
 
-class Counter
+def check_call(cmd)
+  pr = ChildProcess.new(*cmd)
+  pr.io.inherit!
+  pr.start
+  status = pr.wait
+  if status != 0
+    raise "Failed"
+  end
+end
+
+def check_output(cmd)
+  pr = ChildProcess.new(*cmd)
+  pr.io.stdout = out = Tempfile.new('out')
+  pr.io.stderr = STDERR
+  pr.start
+  status = pr.wait
+  if status != 0
+    raise "Failed"
+  end
+  out.rewind
+  out.read
+end
+
+class Downloader
   INDEX_URL = 'https://s3-us-west-2.amazonaws.com/rubygems-dumps/?prefix=production/public_postgresql'
 
   def base_url
@@ -50,14 +76,74 @@ class Counter
 
       puts "Importing"
       db = 'rubygems' + bn.gsub(/[^\d]/, '')[4..7]
-      pr = ChildProcess.new('./script/rubygems-load-pg-dump', '-d', db, '-u', 'w', dest_path)
-      pr.io.inherit!
-      pr.start
-      status = pr.wait
-      if status != 0
-        raise "Failed"
+      check_call(['./script/rubygems-load-pg-dump', '-d', db, '-u', 'w', dest_path])
+    end
+  end
+end
+
+class GemDownload < ActiveRecord::Base
+  belongs_to :version
+  belongs_to :rubygem
+end
+
+class Version < ActiveRecord::Base
+  has_many :gem_downloads
+end
+
+class Rubygem < ActiveRecord::Base
+  has_many :versions
+  has_many :gem_downloads
+end
+
+class Counter
+  def run
+    stats = {}
+    grouped_stats = {}
+    output = check_output(['sh', '-c', "echo '\\l' |psql |grep rubygems"])
+    lines = output.split("\n")
+    lines.each do |line|
+      db = line.strip.split(/\s/).first
+      next if db == 'rubygems'
+      date = Date.parse(db.sub('rubygems', '2018'))
+      ActiveRecord::Base.establish_connection(
+        adapter: 'postgresql', database: db)
+      mongoid = Rubygem.where(name: 'mongoid').first
+      versions = mongoid.versions
+      versions.each do |version|
+        stats[version.number] ||= {}
+        grouped_version = case version.number
+        when /^7/
+          '7'
+        when /^6/
+          '6'
+        when /^5/
+          '5'
+        when /^4/
+          '4'
+        else
+          '?'
+        end
+        stats[version.number][date] = version.gem_downloads.sum(:count)
+        grouped_stats[grouped_version] ||= {}
+        grouped_stats[grouped_version][date] ||= 0
+        grouped_stats[grouped_version][date] += version.gem_downloads.sum(:count)
       end
     end
+    deltas = {}
+    grouped_stats.each do |s, sv|
+      prev = nil
+      grouped_stats.values.first.keys.sort.each do |date|
+        if prev.nil?
+          prev = sv[date]
+        else
+          deltas[s] ||= {}
+          deltas[s][date] = sv[date] - prev
+          prev =  sv[date]
+        end
+      end
+    end
+    payload = deltas.to_json
+    puts payload
   end
 end
 
