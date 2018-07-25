@@ -9,6 +9,9 @@ class Manager
 Vagrant.configure(2) do |config|
   config.vm.box = "#{config.box}"
   config.vm.synced_folder "#{share_path}", "/share"
+  config.vm.provider 'virtualbox' do |v|
+    v.cpus = 2
+  end
 end
 T
   end
@@ -19,6 +22,7 @@ T
     'debian92' => "bento/debian-9.2",
     'ubuntu1404' => "bento/ubuntu-14.04",
     'ubuntu1604' => "bento/ubuntu-16.04",
+    'ubuntu1804' => "bento/ubuntu-18.04",
     'opensuse13' => 'bento/opensuse-13.2-x86_64',
     'centos75' => 'bento/centos-7.5',
   }
