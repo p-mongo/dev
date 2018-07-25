@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'childprocess'
 require 'faraday'
 require 'fileutils'
 require 'addressable'
@@ -29,7 +30,7 @@ class Counter
     FileUtils.mkdir_p('rubygems-dumps')
     dump_urls.each do |dump_url|
       puts "Found #{dump_url}"
-      bn = File.basename(dump_url)
+      bn = File.basename(File.dirname(dump_url)) + '.tar'
       unless File.exist?(dest_path = File.join('rubygems-dumps', bn))
         puts "Download #{dump_url}"
         begin
@@ -39,10 +40,22 @@ class Counter
               f << chunk
             end
           end
+          FileUtils.mv(tmp_path, dest_path)
         rescue
           FileUtils.rm_f(tmp_path)
           puts "Failed"
+          next
         end
+      end
+
+      puts "Importing"
+      db = 'rubygems' + bn.gsub(/[^\d]/, '')[4..7]
+      pr = ChildProcess.new('./script/rubygems-load-pg-dump', '-d', db, '-u', 'w', dest_path)
+      pr.io.inherit!
+      pr.start
+      status = pr.wait
+      if status != 0
+        raise "Failed"
       end
     end
   end
