@@ -144,7 +144,36 @@ class Counter
     end
     payload = deltas.to_json
     puts payload
+
+    puts
+
+    print '# Date '
+    deltas.keys.sort.each do |key|
+      $stdout << key << ' '
+    end
+    puts
+    deltas.values.first.keys.sort.each do |date|
+      print '"' + date.strftime('%Y-%m-%d') + '"'
+      print ' '
+      deltas.keys.sort.each do |key|
+        $stdout << deltas[key][date] << ' '
+      end
+      puts
+    end
+
   end
 end
 
 Counter.new.run
+
+=begin
+# Date       4      5       6       7     ?
+2018-06-04 2696.0 11233.0 22587.0 1602.0 1624.0
+2018-06-11 3091.0 11379.0 25335.0 2187.0 1783.0
+2018-06-18 3351.0 11585.0 28647.0 3460.0 2430.0
+2018-06-25 2844.0 10715.0 32331.0 3148.0 3146.0
+2018-07-02 3013.0  9003.0 30592.0 3049.0 1564.0
+2018-07-09 2766.0  8600.0 31831.0 2970.0 1056.0
+2018-07-16 2997.0  8963.0 39867.0 3076.0 1281.0
+2018-07-23 2891.0  8763.0 40975.0 3660.0 1562.0
+=end
