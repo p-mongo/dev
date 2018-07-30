@@ -6,13 +6,13 @@ dir=/var/mongodb/3.6-ssl
 
 if test -d $dir; then
   if test "$1" = stop; then
-    mlaunch stop --dir $dir "$@"
+    mlaunch stop --dir $dir
   else
-    mlaunch start --dir $dir "$@"
+    mlaunch start --dir $dir
   fi
 else
   mlaunch --single --dir $dir --name ruby-driver-rs \
     --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27400 \
-    --sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
+    --sslMode allowSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
     --binarypath /usr/bin "$@"
 fi
