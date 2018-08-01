@@ -63,9 +63,10 @@ class Runner
   def run_tests
     cfg = generate_config
     #byebug
-    cmd = %w(
-      /home/w/apps/paraspec/bin/paraspec -c
-    ) + [concurrency.to_s] + ['--'] + ARGV
+    cmd = %W(
+      /home/w/apps/paraspec/bin/paraspec -c #{concurrency}
+      --
+    ) + ARGV
     check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
 
