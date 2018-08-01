@@ -12,7 +12,7 @@ if test -d $dir; then
   fi
 else
   mlaunch --replicaset --dir $dir --name ruby-driver-rs \
-    --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 --port 27400 \
+    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 --port 27400 \
     --sslMode allowSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
     --binarypath /usr/bin "$@"
 fi

@@ -8,6 +8,6 @@ if test -d $dir; then
   mlaunch start --dir $dir
 else
   mlaunch --single --dir $dir \
-    --wiredTigerCacheSizeGB 1 \
+    --wiredTigerCacheSizeGB 0.25 \
     --binarypath /usr/local/m/versions/4.0.0-rc6/bin --port 27027 "$@"
 fi
