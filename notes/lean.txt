@@ -1,0 +1,6 @@
+ --wiredTigerCacheSizeGB float¶
+can be a float, min value 0.25
+
+WT reads memory size from /proc/meminfo.
+per-program faking: https://unix.stackexchange.com/questions/258145/recover-from-faking-proc-meminfo#258150
+also https://unix.stackexchange.com/questions/66990/create-a-virtual-file-that-is-actually-a-command/66992#66992
