@@ -64,8 +64,11 @@ class Runner
   def run_tests
     cfg = generate_config
     #byebug
+    user = %w(me w).select do |u|
+      File.exist?("/home/#{u}/apps/paraspec/bin/paraspec")
+    end
     cmd = %W(
-      /home/w/apps/paraspec/bin/paraspec -c #{concurrency}
+      /home/#{user}/apps/paraspec/bin/paraspec -c #{concurrency}
     ) + ARGV
     check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
