@@ -12,5 +12,5 @@ if test -d $dir; then
 else
   mlaunch --single --dir $dir --name ruby-driver-rs \
     --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-    --binarypath /usr/local/m/versions/4.0.0-rc6/bin --port 27090 --unixSocketPrefix /var/run/m "$@"
+    --binarypath /usr/local/m/versions/4.0.0/bin --port 27090 --unixSocketPrefix /var/run/m "$@"
 fi

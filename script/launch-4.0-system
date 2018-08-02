@@ -9,5 +9,5 @@ if test -d $dir; then
 else
   mlaunch --single --dir $dir \
     --wiredTigerCacheSizeGB 0.25 \
-    --binarypath /usr/local/m/versions/4.0.0-rc6/bin --port 27027 "$@"
+    --binarypath /usr/local/m/versions/4.0.0/bin --port 27027 "$@"
 fi
