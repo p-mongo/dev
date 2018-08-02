@@ -5,6 +5,7 @@ require 'json'
 require 'socket'
 require 'fileutils'
 require 'childprocess'
+require 'optparse'
 
 class Runner
   def initialize(concurrency:)
@@ -65,7 +66,6 @@ class Runner
     #byebug
     cmd = %W(
       /home/w/apps/paraspec/bin/paraspec -c #{concurrency}
-      --
     ) + ARGV
     check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
@@ -108,4 +108,16 @@ class Runner
   end
 end
 
-Runner.new(concurrency: 12).run
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: paraspec [options] [-- [rspec-options]...]'
+
+  opts.on('-c', '--concurrency=NUM', 'Number of concurrent workers to use') do |v|
+    if v.to_i == 0
+      raise "Invalid concurrency value: #{v}"
+    end
+    options[:concurrency] = v.to_i
+  end
+end.parse!
+
+Runner.new(concurrency: options[:concurrency] || 2).run
