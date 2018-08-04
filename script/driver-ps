@@ -8,11 +8,12 @@ require 'childprocess'
 require 'optparse'
 
 class Runner
-  def initialize(concurrency:)
-    @concurrency = concurrency
+  def initialize(options)
+    @options = options
+    @concurrency = options[:concurrency]
   end
 
-  attr_reader :concurrency
+  attr_reader :options, :concurrency
 
   def run
     start_clusters
@@ -43,7 +44,7 @@ class Runner
       else
         cmd = mlaunch_cmd + ['init', '--replicaset', '--name', replica_set_name,
           '--wiredTigerCacheSizeGB', '0.25', '--setParameter', 'enableTestCommands=1',
-          '--binarypath', '/usr/local/m/versions/4.0.0-rc6/bin',
+          '--binarypath', '/usr/local/m/versions/4.0.0/bin',
           '--port', (27400+i*10).to_s, '--dir', dir]
       end
       check_call(cmd)
@@ -63,13 +64,7 @@ class Runner
 
   def run_tests
     cfg = generate_config
-    #byebug
-    user = %w(me w).detect do |u|
-      File.exist?("/home/#{u}/apps/paraspec/bin/paraspec")
-    end
-    cmd = %W(
-      /home/#{user}/apps/paraspec/bin/paraspec -c #{concurrency}
-    ) + ARGV
+    cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
     check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
 
@@ -121,6 +116,22 @@ OptionParser.new do |opts|
     end
     options[:concurrency] = v.to_i
   end
+
+  opts.on('--paraspec-path=PATH', 'Path to paraspec') do |v|
+    options[:paraspec_path] = v
+  end
 end.parse!
 
-Runner.new(concurrency: options[:concurrency] || 2).run
+options[:concurrency] ||= 2
+options[:paraspec_path] ||= begin
+  user = %w(me w).detect do |u|
+    File.exist?("/home/#{u}/apps/paraspec/bin/paraspec")
+  end
+  if user
+    "/home/#{user}/apps/paraspec/bin/paraspec"
+  else
+    'paraspec'
+  end
+end
+
+Runner.new(options).run
