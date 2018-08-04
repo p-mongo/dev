@@ -40,6 +40,7 @@ class Runner
   def run_tests
     cfg = generate_config
     cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
+    p cmd
     check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
   end
 
