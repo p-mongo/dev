@@ -64,7 +64,7 @@ class Runner
   def run_tests
     cfg = generate_config
     #byebug
-    user = %w(me w).select do |u|
+    user = %w(me w).detect do |u|
       File.exist?("/home/#{u}/apps/paraspec/bin/paraspec")
     end
     cmd = %W(
