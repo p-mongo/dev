@@ -37,16 +37,6 @@ class Runner
     end
   end
 
-  def chmod_sockets(i)
-    0.upto(2) do |j|
-      socket_path = "/tmp/mongodb-#{27400+i*10+j}.sock"
-      unless File.exist?(socket_path)
-        raise "Missing socket at #{socket_path}"
-      end
-      sudo_chmod('0666', socket_path)
-    end
-  end
-
   def run_tests
     cfg = generate_config
     cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
@@ -68,7 +58,7 @@ class Runner
   end
 
   def mlaunch_cmd
-    %w(sudo -iu m mlaunch)
+    %w(mlaunch)
   end
 
   def sudo_chmod(mode, path)
