@@ -1,0 +1,122 @@
+#!/usr/bin/env ruby
+
+require 'byebug'
+require 'json'
+require 'socket'
+require 'fileutils'
+require 'childprocess'
+require 'optparse'
+
+class Runner
+  def initialize(options)
+    @options = options
+    @concurrency = options[:concurrency]
+  end
+
+  attr_reader :options, :concurrency
+
+  def run
+    start_clusters
+    run_tests
+  end
+
+  def start_clusters
+    1.upto(concurrency) do |i|
+      socket_path = "/tmp/mongodb-#{27400+i*10}.sock"
+
+      dir = "/var/mongodb/4.0-rsp-#{i}"
+      if File.exist?(dir)
+        cmd = mlaunch_cmd + ['start', '--dir', dir]
+      else
+        cmd = mlaunch_cmd + ['init', '--replicaset', '--name', replica_set_name,
+          '--wiredTigerCacheSizeGB', '0.25', '--setParameter', 'enableTestCommands=1',
+          '--binarypath', File.expand_path('~'),
+          '--port', (27400+i*10).to_s, '--dir', dir]
+      end
+      check_call(cmd)
+    end
+  end
+
+  def chmod_sockets(i)
+    0.upto(2) do |j|
+      socket_path = "/tmp/mongodb-#{27400+i*10+j}.sock"
+      unless File.exist?(socket_path)
+        raise "Missing socket at #{socket_path}"
+      end
+      sudo_chmod('0666', socket_path)
+    end
+  end
+
+  def run_tests
+    cfg = generate_config
+    cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
+    check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
+  end
+
+  def generate_config
+    m = {}
+    1.upto(concurrency).each do |i|
+      m[i] = {
+        'MONGODB_URI' => "mongodb://localhost:#{27400+i*10},localhost:#{27401+i*10},localhost:#{27402+i*10}/?replicaSet=#{replica_set_name}",
+      }
+    end
+    m.to_json
+  end
+
+  def replica_set_name
+    'psrs'
+  end
+
+  def mlaunch_cmd
+    %w(sudo -iu m mlaunch)
+  end
+
+  def sudo_chmod(mode, path)
+    check_call(['sudo', 'chmod', mode.to_s, path])
+  end
+
+  def check_call(cmd, env: nil)
+    process = ChildProcess.new(*cmd)
+    process.io.inherit!
+    if env
+      env.each do |k, v|
+        process.environment[k.to_s] = v
+      end
+    end
+    process.start
+    process.wait
+    unless process.exit_code == 0
+      raise "Failed to execute: #{cmd}"
+    end
+  end
+end
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: paraspec [options] [-- [rspec-options]...]'
+
+  opts.on('-c', '--concurrency=NUM', 'Number of concurrent workers to use') do |v|
+    if v.to_i == 0
+      raise "Invalid concurrency value: #{v}"
+    end
+    options[:concurrency] = v.to_i
+  end
+
+  opts.on('--paraspec-path=PATH', 'Path to paraspec') do |v|
+    options[:paraspec_path] = v
+  end
+end.parse!
+
+options[:concurrency] ||= 2
+options[:paraspec_path] ||= begin
+  user = %w(me w).detect do |u|
+    File.exist?("/home/#{u}/apps/paraspec/bin/paraspec")
+  end
+  if user
+    "/home/#{user}/apps/paraspec/bin/paraspec"
+  else
+    'paraspec'
+  end
+end
+
+Runner.new(options).run
