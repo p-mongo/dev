@@ -24,7 +24,7 @@ class Runner
     1.upto(concurrency) do |i|
       socket_path = "/tmp/mongodb-#{27400+i*10}.sock"
 
-      dir = "$HOME/4.0-rsp-#{i}"
+      dir = File.expand_path("~/4.0-rsp-#{i}")
       if File.exist?(dir)
         cmd = mlaunch_cmd + ['start', '--dir', dir]
       else
