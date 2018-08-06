@@ -8,16 +8,23 @@ class DocsBuilder
   class_attribute :work_path
   class_attribute :docs_repo_url
   class_attribute :build_root
+  class_attribute :web_root
 
   self.build_root = Pathname.new(File.expand_path('~/tmp/docs-build'))
+  self.web_root = Pathname.new(File.expand_path('~/tmp/docs-web'))
 
   def setup
     FileUtils.mkdir_p(self.class.build_root)
+    FileUtils.mkdir_p(self.class.web_root)
   end
 
   def build
     setup
+    build_tutorial
+    build_yardocs
+  end
 
+  def build_tutorial
     bn = self.class.work_path.basename
 
     dr_work_path = self.class.build_root.join(bn)
@@ -72,6 +79,16 @@ S
     check_call(['sh', '-c', <<S], cwd: dr_work_path)
         make clean html
 S
+    FileUtils.mkdir_p(web_root.join('driver'))
+    check_call(['rsync', '-av', '--delete', dr_work_path.join('build', 'master', 'html').to_s + '/',
+      web_root.join('driver', 'tutorial')])
+  end
+
+  def build_yardocs
+    check_call(%w(rake docs), cwd: work_path)
+    FileUtils.mkdir_p(web_root.join('driver'))
+    check_call(['rsync', '-av', '--delete', work_path.join('yard-docs', '2.6.1').to_s + '/',
+      web_root.join('driver', 'api')])
   end
 
   def check_call(cmd, env: nil, cwd: nil)
