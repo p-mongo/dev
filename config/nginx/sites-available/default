@@ -68,6 +68,10 @@ server {
 	#location ~ /\.ht {
 	#	deny all;
 	#}
+	
+	location /docs/ruby-driver {
+		alias /home/w/tmp/docs-build/ruby-driver/build/master/html;
+	}
 }
 
 
