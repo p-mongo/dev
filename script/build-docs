@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+$: << File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'docs_builder'
+
+what = ARGV.shift
+cls = case what
+when 'driver'
+  DriverDocsBuilder
+when 'mongoid'
+  MongoidDocsBuilder
+else
+  raise 'What do I build?'
+end
+
+cls.new.build
