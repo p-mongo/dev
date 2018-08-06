@@ -2,7 +2,15 @@
 
 $: << File.join(File.dirname(__FILE__), '..', 'lib')
 
+require 'optparse'
 require 'docs_builder'
+
+options = {}
+OptionParser.new do |opts|
+  opts.on('-w', '--watch', 'Watch for changes and rebuild automatically') do |v|
+    options[:watch] = v
+  end
+end.parse!
 
 what = ARGV.shift
 cls = case what
@@ -14,4 +22,13 @@ else
   raise 'What do I build?'
 end
 
-cls.new.build
+builder = cls.new
+if options[:watch]
+  builder.build
+  self_path = File.expand_path($0)
+  Dir.chdir(builder.work_path) do
+    builder.check_call(['watch', self_path + ' ' + what])
+  end
+else
+  builder.build
+end
