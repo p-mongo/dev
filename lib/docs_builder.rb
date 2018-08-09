@@ -50,10 +50,10 @@ S
     end
 
     check_call(['sh', '-c', <<S], cwd: cr_work_path)
-        git checkout build || git checkout -b build &&
+        (git checkout build || git checkout -b build) &&
         git reset --hard master
 S
-    check_call(['echo', 'rsync', '-av', '--delete', '--exclude', '.git',
+    check_call(['rsync', '-av', '--delete', '--exclude', '.git',
       self.class.work_path.to_s + '/', cr_work_path])
     check_call(['sh', '-c', <<S], cwd: cr_work_path)
         git add . &&
