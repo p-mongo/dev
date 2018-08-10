@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -e
+
+cache_dir=$HOME/.cache/repos
+mkdir -p $cache_dir
+
+if test -d $cache_dir/toolchain; then
+  (cd $cache_dir/toolchain &&
+  git reset --hard &&
+  git checkout master &&
+  git fetch origin &&
+  git reset --hard origin/master)
+else
+  git clone git@github.com:10gen/mongo-ruby-toolchain $cache_dir/toolchain
+fi
+
+sha=`(cd $cache_dir/toolchain && git show --pretty=oneline |head -n 1 |awk '{print $1}')`
+echo $sha
+
+eval `ssh-agent`
+trap "kill $SSH_AGENT_PID" exit
+
+check() {
+  host=$1
+  
+  if ssh $host "ls -d /opt/ruby-$sha"; then
+    echo "$host yes"
+  else
+    echo "$host no"
+  fi
+}
+
+check s390x
+check ppc64le
+check arm64
+
+kill $SSH_AGENT_PID
