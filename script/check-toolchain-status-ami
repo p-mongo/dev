@@ -13,10 +13,19 @@ Dotenv.load
 
 class Checker
   def distro_names
-    %w(debian92-build)
+    %w(
+      debian92-test
+      debian81-test
+      rhel70
+      ubuntu1204-test
+      ubuntu1404-test
+      ubuntu1604-test
+      ubuntu1804-test
+    )
   end
 
   def run
+    @statuses = {}
     distro_names.each do |distro_name|
       host = eg_client.spawn_host(distro_name: distro_name, key_name: key_name)
       while %w(initializing building starting provisioning).include?(host.status)
@@ -64,15 +73,21 @@ class Checker
         '-l', host.user,
         '-i', File.expand_path('~/.ssh/id_rsa.aws'),
         hostname, "ls /opt/ruby-#{toolchain_sha}"]
-      p cmd
       process = call(cmd)
       if process.exit_code == 0
         puts "#{distro_name}: yes"
+        @statuses[distro_name] = true
       else
         puts "#{distro_name}: no"
+        @statuses[distro_name] = false
       end
 
       host.terminate
+    end
+  ensure
+    puts "Final results:"
+    @statuses.keys.sort.each do |distro_name|
+      puts "#{distro_name}: #{@statuses[distro_name] ? 'yes' : 'no'}"
     end
   end
 
