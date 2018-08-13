@@ -1,0 +1,154 @@
+#!/usr/bin/env ruby
+
+$: << '../egrc/lib'
+
+require 'tempfile'
+require 'pathname'
+require 'fileutils'
+require 'childprocess'
+require 'evergreen'
+require 'dotenv'
+
+Dotenv.load
+
+class Checker
+  def distro_names
+    %w(debian92-build)
+  end
+
+  def run
+    distro_names.each do |distro_name|
+      host = eg_client.spawn_host(distro_name: distro_name, key_name: key_name)
+      while %w(initializing building starting provisioning).include?(host.status)
+        puts "Host status #{host.status}, waiting"
+        sleep 1
+        begin
+          next_host = Evergreen::Host.new(eg_client, host.id)
+          # force info retrieval here
+          next_host.info
+          host = next_host
+        rescue Evergreen::Client::ApiError
+          # https://jira.mongodb.org/browse/EVG-5184 - host id changed and
+          # we have lost the ability to track the host.
+          # Get all the hosts and pick any that has the right distro
+          running_host = eg_client.user_hosts.detect do |cand_host|
+            cand_host.distro.name == host.distro.name
+          end
+          if running_host.nil?
+            raise "Uh oh"
+          end
+          host = running_host
+        end
+      end
+
+      hostname = host.host_url
+      toolchain_sha = get_toolchain_sha
+
+      # make sure we are able to connect
+      started = Time.now
+      while Time.now - started < 30
+        cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
+          '-l', host.user,
+          '-i', File.expand_path('~/.ssh/id_rsa.aws'),
+          hostname, "ls /opt/ruby-*"]
+        process = call(cmd)
+        if process.exit_code == 0
+          break
+        end
+        puts "Waiting for instance to become ready"
+        sleep 1
+      end
+
+      # ready or not do the check we want
+      cmd = ['ssh', '-o', 'StrictHostKeyChecking=no',
+        '-l', host.user,
+        '-i', File.expand_path('~/.ssh/id_rsa.aws'),
+        hostname, "ls /opt/ruby-#{toolchain_sha}"]
+      p cmd
+      process = call(cmd)
+      if process.exit_code == 0
+        puts "#{distro_name}: yes"
+      else
+        puts "#{distro_name}: no"
+      end
+
+      host.terminate
+    end
+  end
+
+  def key_name
+    @key_name ||= eg_client.keys.first.name.tap do |v|
+      unless v
+        raise "There are no keys in evergreen"
+      end
+    end
+  end
+
+  def get_toolchain_sha
+    repos_path = File.expand_path('~/.cache/repos')
+    FileUtils.mkdir_p(repos_path)
+    repos_path = Pathname.new(repos_path)
+    if File.exist?(toolchain_path = repos_path.join('toolchain'))
+      Dir.chdir(toolchain_path) do
+        check_call(%w(git reset --hard))
+        check_call(%w(git checkout master))
+        check_call(%w(git fetch origin))
+        check_call(%w(git reset --hard origin/master))
+      end
+    else
+      check_call(%W(git clone git@github.com:10gen/mongo-ruby-toolchain) + [toolchain_path])
+    end
+
+    Dir.chdir(toolchain_path) do
+      output = check_output(%w(git show --pretty=oneline))
+      output.strip.split(/\s/, 2).first
+    end
+  end
+
+  def eg_client
+    @eg_client ||= Evergreen::Client.new(
+        username: ENV['EVERGREEN_AUTH_USERNAME'],
+        api_key: ENV['EVERGREEN_API_KEY'],
+      )
+  end
+
+  def call(cmd, env: nil)
+    process = ChildProcess.new(*cmd)
+    process.io.inherit!
+    if env
+      env.each do |k, v|
+        process.environment[k.to_s] = v
+      end
+    end
+    process.start
+    process.wait
+    process
+  end
+
+  def check_call(cmd, env: nil)
+    process = call(cmd, env: env)
+    unless process.exit_code == 0
+      raise "Failed to execute: #{cmd}"
+    end
+  end
+
+  def check_output(cmd, env: nil)
+    process = ChildProcess.new(*cmd)
+    process.io.inherit!
+    process.io.stdout = Tempfile.new("child-output")
+    if env
+      env.each do |k, v|
+        process.environment[k.to_s] = v
+      end
+    end
+    process.start
+    process.wait
+    unless process.exit_code == 0
+      raise "Failed to execute: #{cmd}"
+    end
+    process.io.stdout.rewind
+    process.io.stdout.read
+  end
+end
+
+Checker.new.run
