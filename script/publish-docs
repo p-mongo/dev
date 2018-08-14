@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+if test "$1" = mongoid; then
+    project=mongoid
+    branches="5.2 6.1 6.2 6.3 6.4 7.0"
+else
+    project=ruby
+    branches="v1.x v2.0 v2.2 v2.3 v2.4 v2.5 v2.6"
+fi
+
+dir=`mktemp -d`
+
+cd $dir
+
+git clone https://github.com/mongodb/docs-$project
+cd docs-$project
+make publish deploy
+
+for branch in $branches; do
+    git checkout $branch
+    make publish deploy || true
+done
+
+cd /
+rm -rf "$dir"
