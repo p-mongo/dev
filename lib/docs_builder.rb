@@ -9,6 +9,8 @@ class DocsBuilder
   class_attribute :docs_repo_url
   class_attribute :build_root
   class_attribute :web_root
+  class_attribute :output_subdir
+  class_attribute :version
 
   self.build_root = Pathname.new(File.expand_path('~/tmp/docs-build'))
   self.web_root = Pathname.new(File.expand_path('~/tmp/docs-web'))
@@ -65,7 +67,7 @@ S
     contents = File.read(dr_work_path.join('config', 'build_conf.yaml'))
     config = YAML.load(contents)
     config['assets'].each do |asset|
-      if asset['repository'] =~ /ruby-driver/
+      if asset['repository'] =~ /ruby-driver|mongoid/
         asset['repository'] = cr_work_path.to_s
         asset['branch'] = 'build'
         break
@@ -79,16 +81,16 @@ S
     check_call(['sh', '-c', <<S], cwd: dr_work_path)
         make clean html
 S
-    FileUtils.mkdir_p(web_root.join('driver'))
+    FileUtils.mkdir_p(web_root.join(output_subdir))
     check_call(['rsync', '-av', '--delete', dr_work_path.join('build', 'master', 'html').to_s + '/',
-      web_root.join('driver', 'tutorial')])
+      web_root.join(output_subdir, 'tutorial')])
   end
 
   def build_yardocs
     check_call(%w(rake docs), cwd: work_path)
-    FileUtils.mkdir_p(web_root.join('driver'))
-    check_call(['rsync', '-av', '--delete', work_path.join('yard-docs', '2.6.1').to_s + '/',
-      web_root.join('driver', 'api')])
+    FileUtils.mkdir_p(web_root.join(output_subdir))
+    check_call(['rsync', '-av', '--delete', work_path.join('yard-docs', version).to_s + '/',
+      web_root.join(output_subdir, 'api')])
   end
 
   def check_call(cmd, env: nil, cwd: nil)
@@ -113,9 +115,13 @@ end
 class DriverDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/ruby-driver'))
   self.docs_repo_url = 'https://github.com/mongodb/docs-ruby'
+  self.output_subdir = 'driver'
+  self.version = '2.6.1'
 end
 
 class MongoidDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/mongoid'))
   self.docs_repo_url = 'https://github.com/mongodb/docs-mongoid'
+  self.output_subdir = 'mongoid'
+  self.version = '7.1.0'
 end
