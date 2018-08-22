@@ -2,6 +2,11 @@
 
 set -e
 
+which=$1
+if test -z "$which"; then
+  which=1
+fi
+
 cache_dir=$HOME/.cache/repos
 mkdir -p $cache_dir
 
@@ -15,7 +20,7 @@ else
   git clone git@github.com:10gen/mongo-ruby-toolchain $cache_dir/toolchain
 fi
 
-sha=`(cd $cache_dir/toolchain && git show --pretty=oneline |head -n 1 |awk '{print $1}')`
+sha=`(cd $cache_dir/toolchain && git log --pretty=oneline |head -n $which |tail -n 1 |awk '{print $1}')`
 echo $sha
 
 eval `ssh-agent`
@@ -24,15 +29,42 @@ trap "kill $SSH_AGENT_PID" exit
 check() {
   host=$1
   
+  ok=true
+  
   if ssh $host "ls -d /opt/ruby-$sha"; then
-    echo "$host yes"
+    echo "$host: have /opt/ruby-$sha"
   else
-    echo "$host no"
+    echo "$host do not have /opt/ruby-$sha"
+    ok=false
+  fi
+  
+  if $ok; then
+    if ssh $host 'ls -d $HOME/.rubies'; then
+      echo "$host: have ~/.rubies"
+    else
+      echo "$host: do not have ~/.rubies"
+      ok=false
+    fi
+  fi
+  
+  if $ok; then
+    if ssh $host 'test `ls -d \$HOME/.rubies` = '/opt/ruby-$sha; then
+      echo "$host: ~/.rubies points to correct toolchain"
+    else
+      echo "$host: ~/.rubies does not point to correct toolchain"
+      ok=false
+    fi
+  fi
+  
+  if $ok; then
+    echo "$host: yes"
+  else
+    echo "$host: no"
   fi
 }
 
-check s390x
-check ppc64le
-check arm64
+check rhel72-s390x
+check rhel71-ppc
+check ubuntu1604-arm
 
 kill $SSH_AGENT_PID
