@@ -32,7 +32,17 @@ msg=`ruby <<TT
   payload = JSON.parse(open(url).read)
   puts payload['fields']['summary']
 TT`
+type=`ruby <<TT
+  require 'open-uri'
+  require 'json'
+  url = "https://jira.mongodb.org/rest/api/2/issue/$jira_project-$ticket"
+  payload = JSON.parse(open(url).read)
+  puts payload['fields']['issuetype']['name']
+TT`
 new_msg="$jira_project-$ticket $msg"
+if test "$type" = Bug; then
+  new_msg="Fix $new_msg"
+fi
 echo $new_msg
 (git branch -D backup || true) &&
 git branch backup HEAD &&
@@ -41,4 +51,4 @@ git pull &&
 git checkout $branch &&
 git reset --soft $(git merge-base master $branch) && git commit -am "$new_msg" &&
 git rebase master &&
-git pp -f
+git pp $branch -f
