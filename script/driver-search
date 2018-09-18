@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+driver_repos="mongo-c-driver mongo-cxx-driver mongo-csharp-driver \
+mongo-java-driver node-mongodb-native mongo-perl-driver mongo-php-driver \
+mongo-python-driver motor mongo-ruby-driver mongoid mongo-scala-driver"
+
+for repo in $driver_repos; do
+  (cd $HOME/.cache &&
+    if test -d $repo; then
+      cd $repo && git checkout master && git fetch origin &&
+      git reset --hard origin/master
+    else
+      git clone https://github.com/mongodb/$repo
+    fi
+  )
+done
+
+unset PAGER
+for repo in $driver_repos; do
+  echo $repo
+  (cd $HOME/.cache/$repo && git grep "$@") || true
+  echo
+done
