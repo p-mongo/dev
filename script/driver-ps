@@ -11,6 +11,7 @@ class Runner
   def initialize(options)
     @options = options
     @concurrency = options[:concurrency]
+    @processes = []
   end
 
   attr_reader :options, :concurrency
@@ -99,9 +100,16 @@ class Runner
       end
     end
     process.start
+    @processes << process
     process.wait
     unless process.exit_code == 0
       raise "Failed to execute: #{cmd}"
+    end
+  end
+
+  def kill
+    @processes.each do |process|
+      p process
     end
   end
 end
@@ -134,4 +142,9 @@ options[:paraspec_path] ||= begin
   end
 end
 
-Runner.new(options).run
+runner = Runner.new(options)
+begin
+  runner.run
+rescue Interrupt
+  runner.kill
+end

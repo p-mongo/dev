@@ -19,7 +19,14 @@ when 'driver'
 when 'mongoid'
   MongoidDocsBuilder
 else
-  raise 'What do I build?'
+  cwd = Dir.pwd.split('/')
+  if cwd.include?('mongoid')
+    MongoidDocsBuilder
+  elsif cwd.include?('ruby-driver')
+    DriverDocsBuilder
+  else
+    raise 'What do I build?'
+  end
 end
 
 builder = cls.new
