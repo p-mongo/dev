@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+dir=/var/mongodb/4.0-ssl-rs
+
+if test -d $dir; then
+  if test "$1" = stop; then
+    mlaunch stop --dir $dir "$@"
+  else
+    mlaunch start --dir $dir "$@"
+  fi
+else
+  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
+    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 --port 27440 \
+    --sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
+    --sslAllowConnectionsWithoutCertificates \
+    --binarypath /usr/local/m/versions/4.0.0/bin "$@"
+fi
