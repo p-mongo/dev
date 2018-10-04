@@ -17,9 +17,8 @@ for repo in $driver_repos; do
   )
 done
 
-unset PAGER
 for repo in $driver_repos; do
   echo $repo
-  (cd $HOME/.cache/$repo && git grep "$@") || true
+  (cd $HOME/.cache/$repo && git -P grep "$@") || true
   echo
 done
