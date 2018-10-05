@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+dir=/var/mongodb/3.6-rs-auth
+
+if test -d $dir; then
+  mlaunch start --dir $dir
+else
+  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
+    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
+    --auth --username dev --password dev \
+    --binarypath /usr/local/m/versions/3.6.7/bin --port 27360 "$@"
+fi
