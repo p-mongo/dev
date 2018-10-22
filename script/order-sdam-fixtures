@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+# todo handle comments, probably manually
+
+require 'yaml'
+
+ARGV.each do |path|
+  data = YAML.load(File.read(path))
+
+  new_data = {}
+  %w(description uri phases).each do |key|
+    new_data[key] = data.delete(key)
+    data.keys.sort.each do |key|
+      new_data[key] = data[key]
+    end
+  end
+
+  data = new_data
+  data['phases'] = data['phases'].map do |phase|
+    new_phase = {}
+    %w(responses outcome).each do |key|
+      new_phase[key] = phase.delete(key)
+    end
+    phase.keys.sort.each do |key|
+      new_phase[key] = phase[key]
+    end
+    new_phase
+  end
+
+  File.open(path, 'w') do |f|
+    f << YAML.dump(data)
+  end
+end
