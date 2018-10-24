@@ -5,8 +5,8 @@ set -e
 ticket="$1"
 branch=`git branch |egrep ^'\\*' |awk '{print $2}'`
 if test -z "$ticket"; then
-  if echo $branch |egrep -q '^(ruby|mongoid)-[0-9][0-9]*$'; then
-    if echo $branch |grep -q mongoid; then
+  if echo $branch |egrep -iq '^(ruby|mongoid)-[0-9][0-9]*$'; then
+    if echo $branch |grep -iq mongoid; then
       project=mongoid
     else
       project=ruby
@@ -17,7 +17,7 @@ if test -z "$ticket"; then
     return 5
   fi
 else
-  if echo $ticket |grep -q mongoid; then
+  if echo $ticket |grep -iq mongoid; then
     project=mongoid
   else
     project=ruby
