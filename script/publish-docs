@@ -1,27 +1,65 @@
-#!/bin/sh
+#!/usr/bin/env perl
 
-set -e
+use strict;
+use warnings;
 
-if test "$1" = mongoid; then
-    project=mongoid
-    branches="5.2 6.1 6.2 6.3 6.4 7.0"
-else
-    project=ruby
-    branches="v1.x v2.0 v2.2 v2.3 v2.4 v2.5 v2.6"
-fi
+use File::Temp qw/tempfile tempdir/;
+  
+sub build {
+    my ($project, $branch) = @_;
+    
+    check_call("git checkout $branch");
+    check_call("make publish deploy");
+}
 
-dir=`mktemp -d`
+sub check_call {
+    my ($cmd) = shift;
+    my $rv = system($cmd);
+    if ($rv != 0) {
+        die "Failed to run $cmd";
+    }
+}
 
-cd $dir
+sub doit {
+    my $project = shift @ARGV;
 
-git clone https://github.com/mongodb/docs-$project
-cd docs-$project
-make publish deploy
+    my %branches = (
+        'mongoid',
+        qw/5.2 6.1 6.2 6.3 6.4 7.0/,
+        'ruby',
+        qw/v1.x v2.0 v2.2 v2.3 v2.4 v2.5 v2.6/,
+    );
 
-for branch in $branches; do
-    git checkout $branch
-    make publish deploy || true
-done
+    my $branch = shift @ARGV;
 
-cd /
-rm -rf "$dir"
+    my @projects;
+    if ($project eq '*') {
+        @projects = qw/mongoid ruby/;
+    } elsif (!$project) {
+        @projects = qw/ruby/;
+    } elsif ($project eq 'ruby' || $project eq 'mongoid') {
+        @projects = ($project);
+    } else {
+        die "Bogus project: $project";
+    }
+
+    my $dir = tempdir(CLEANUP => 1);
+    chdir($dir);
+
+    for $project (@projects) {
+        check_call("git clone https://github.com/mongodb/docs-$project");
+        chdir("docs-$project");
+        if ($branch) {
+            build($project, $branch);
+        } else {
+            for $branch ($branches{$project}) {
+                build($project, $branch);
+            }
+        }
+        chdir('..');
+    }
+
+    chdir('/');
+}
+
+doit;
