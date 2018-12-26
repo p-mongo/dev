@@ -2,14 +2,14 @@
 
 set -e
 
-dir=/var/mongodb/4.1-rs
+dir=/var/mongodb/4.1-single
 
 if test -d $dir; then
   mlaunch start --dir $dir
 else
-  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
+  mlaunch --single --dir $dir --name ruby-driver-rs \
     --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-    --binarypath /usr/local/m/versions/4.1 --port 27741 "$@"
+    --binarypath /usr/local/m/versions/4.1 --port 27740 "$@"
 fi
 
 # MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs
