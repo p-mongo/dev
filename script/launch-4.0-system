@@ -3,11 +3,12 @@
 set -e
 
 dir=/var/mongodb/4.0-system
+bindir=/usr/local/m/versions/4.0.3/bin
 
 if test -d $dir; then
   mlaunch start --dir $dir
 else
   mlaunch --single --dir $dir \
     --wiredTigerCacheSizeGB 0.25 \
-    --binarypath /usr/local/m/versions/4.0.0/bin --port 27027 "$@"
+    --binarypath $bindir --port 27027 "$@"
 fi
