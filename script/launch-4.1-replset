@@ -9,6 +9,8 @@ if test -d $dir; then
 else
   mlaunch --replicaset --dir $dir --name ruby-driver-rs \
     --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
+    --maxConns 200 \
+    --setParameter diagnosticDataCollectionEnabled=false \
     --binarypath /usr/local/m/versions/4.1 --port 27741 "$@"
 fi
 
