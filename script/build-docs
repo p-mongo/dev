@@ -24,6 +24,8 @@ else
     MongoidDocsBuilder
   elsif cwd.include?('ruby-driver')
     DriverDocsBuilder
+  elsif cwd.include?('bson-ruby')
+    BsonDocsBuilder
   else
     raise 'What do I build?'
   end
