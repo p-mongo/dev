@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+for os in rhel71-ppc rhel72-s390x; do
+  if ssh $os 'test /tmp/oleg/ruby-toolchain.tar.gz'; then
+    rev=`ssh $os "cd mongo-ruby-toolchain && git log |head -n 1 |awk '{print \\$2}'"`
+
+    mkdir -p $HOME/apps/exp/buit-toolchain/$rev/$os
+    echo "Fetching $rev from $os"
+    scp $os:"/tmp/oleg/ruby-toolchain.tar.gz" $HOME/apps/exp/buit-toolchain/$rev/$os
+  fi
+done
