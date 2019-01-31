@@ -2,7 +2,7 @@
 
 set -e
 
-dir=/var/mongodb/2.6-rs
+dir=/mnt/zram/mongodb/2.6-rs
 
 if test -d $dir; then
   mlaunch start --dir $dir

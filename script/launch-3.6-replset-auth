@@ -2,7 +2,7 @@
 
 set -e
 
-dir=/var/mongodb/3.6-rs-auth
+dir=/mnt/zram/mongodb/3.6-rs-auth
 
 if test -d $dir; then
   mlaunch start --dir $dir

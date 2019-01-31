@@ -2,7 +2,7 @@
 
 set -e
 
-dir=/var/mongodb/4.0-system
+dir=/mnt/zram/mongodb/4.0-system
 bindir=/usr/local/m/versions/4.0.3/bin
 
 if test -d $dir; then

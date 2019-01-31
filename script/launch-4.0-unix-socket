@@ -2,7 +2,7 @@
 
 set -e
 
-dir=/var/mongodb/4.0-unix-socket
+dir=/mnt/zram/mongodb/4.0-unix-socket
 
 #sudo mkdir -p /var/run/m
 #sudo chown `id -u`:`id -g` /var/run/m

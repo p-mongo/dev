@@ -2,7 +2,7 @@
 
 set -e
 
-dir=/var/mongodb/3.6-ssl
+dir=/mnt/zram/mongodb/3.6-ssl
 
 if test -d $dir; then
   if test "$1" = stop; then
