@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+sudo modprobe zram
+dev=`sudo zramctl -f -s 10g`
+if ! echo "$dev" |grep -q ^/dev/zram; then
+  echo "Bogus device $dev" 1>&2
+  exit 3
+fi
+sudo mkfs.ext4 "$dev"
+sudo mkdir -p /mnt/zram
+sudo mount "$dev" /mnt/zram
+sudo mkdir /mnt/zram/mongodb
+sudo chown m:m /mnt/zram/mongodb
