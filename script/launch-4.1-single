@@ -2,14 +2,12 @@
 
 set -e
 
-dir=/mnt/zram/mongodb/4.1-single
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
 
-if test -d $dir; then
-  mlaunch start --dir $dir
-else
-  mlaunch --single --dir $dir --name ruby-driver-rs \
-    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-    --binarypath /usr/local/m/versions/4.1 --port 27740 "$@"
-fi
+dbdir=/mnt/zram/mongodb/4.1-single
+bindir=/usr/local/m/versions/4.1
+port=27740
+launchargs="--single"
 
-# MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs
+do_mlaunch "$@"

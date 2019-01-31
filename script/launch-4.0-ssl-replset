@@ -2,18 +2,14 @@
 
 set -e
 
-dir=/mnt/zram/mongodb/4.0-ssl-rs
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
 
-if test -d $dir; then
-  if test "$1" = stop; then
-    mlaunch stop --dir $dir "$@"
-  else
-    mlaunch start --dir $dir "$@"
-  fi
-else
-  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
-    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 --port 27440 \
-    --sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
-    --sslAllowConnectionsWithoutCertificates \
-    --binarypath /usr/local/m/versions/4.0.0/bin "$@"
-fi
+dbdir=/mnt/zram/mongodb/4.0-ssl-rs
+bindir=/usr/local/m/versions/4.0
+port=27440
+launchargs="--replicaset --name ruby-driver-rs \
+--sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
+--sslAllowConnectionsWithoutCertificates"
+
+do_mlaunch "$@"
