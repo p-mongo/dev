@@ -2,18 +2,14 @@
 
 set -e
 
-dir=/mnt/zram/mongodb/4.0-rs
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
 
-if test -d $dir; then
-  mlaunch start --dir $dir
-else
-  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
-    --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-    --setParameter ttlMonitorEnabled=false \
-    --setParameter diagnosticDataCollectionEnabled=false \
-    --wiredTigerEngineConfigString "log=(prealloc=false,file_max=20MB)" \
-    --binarypath /usr/local/m/versions/4.0 --port 27100 "$@"
-fi
+dbdir=/mnt/zram/mongodb/4.0-rs
+bindir=/usr/local/m/versions/4.0
+port=27100
+
+do_mlaunch "$@"
 
 #     --storageEngine ephemeralForTest \
 
