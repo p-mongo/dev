@@ -9,7 +9,13 @@ if test -d $dir; then
 else
   mlaunch --replicaset --dir $dir --name ruby-driver-rs \
     --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
+    --setParameter ttlMonitorEnabled=false \
+    --setParameter diagnosticDataCollectionEnabled=false \
+    --wiredTigerEngineConfigString "log=(prealloc=false,file_max=20MB)" \
     --binarypath /usr/local/m/versions/4.0 --port 27100 "$@"
 fi
+
+#     --storageEngine ephemeralForTest \
+
 
 # MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs
