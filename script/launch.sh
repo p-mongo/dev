@@ -17,6 +17,7 @@ do_mlaunch() {
   fi
 }
 
+# --maxConns 200
 #     --storageEngine ephemeralForTest \
 
 # MONGODB_URI=mongodb://127.0.0.1:27100,127.0.0.1:27001/\?replicaSet=ruby-driver-rs bs
