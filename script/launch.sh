@@ -8,7 +8,7 @@ do_mlaunch() {
       mlaunch start --dir $dbdir
     fi
   else
-    mlaunch --replicaset --dir $dbdir --name ruby-driver-rs \
+    mlaunch $launchargs --dir $dbdir \
       --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
       --setParameter ttlMonitorEnabled=false \
       --setParameter diagnosticDataCollectionEnabled=false \
