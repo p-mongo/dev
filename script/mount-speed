@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+
+sudo mount -o intr,soft speed:/home/w /mnt/speed
