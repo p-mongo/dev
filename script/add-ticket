@@ -3,4 +3,7 @@
 set -e
 
 ticket="$1"
+if test -z "$ticket"; then
+  ticket=`git branch |grep '^\*' |awk '{print $2}' | sed -e s/'-.*//'`
+fi
 git filter-branch -f --msg-filter 'perl -e "undef \$/; \$m=<>; \$m =~ s/^RUBY-\d+ //; \$m =~ s/^/RUBY-'$ticket' /; print \$m"' master..HEAD
