@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Uses https://github.com/mcguinness/janky-ca to create all needed certificates
+
+set -e
+
+if test -d .janky-ca; then
+  (cd .janky-ca &&
+    git checkout master &&
+    git reset --hard HEAD &&
+    git pull)
+else
+  git clone https://github.com/mcguinness/janky-ca .janky-ca
+fi
+
+ca_bin_dir=`pwd`/.janky-ca
+
+export CERT_AUTHORITY_HOME=`pwd`/.ca
+rm -rf "$CERT_AUTHORITY_HOME"
+mkdir -p "$CERT_AUTHORITY_HOME"
+
+ca() {
+  (cd $ca_bin_dir && bash ./cert_authority.sh "$@")
+}
+
+ca --bootstrap
+
+cat .ca/private/127.0.0.1.pem .ca/certs/127.0.0.1.pem  >cert/127.0.0.1.pem
