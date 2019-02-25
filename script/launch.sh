@@ -8,11 +8,13 @@ do_mlaunch() {
       mlaunch start --dir $dbdir
     fi
   else
+  # 4.1 only
+  #    --setParameter ttlMonitorEnabled=false \
+  # https://github.com/rueckstiess/mtools/issues/683
+  #    --wiredTigerEngineConfigString "log=(prealloc=false,file_max=20MB)" \
     mlaunch $launchargs --dir $dbdir \
       --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-      --setParameter ttlMonitorEnabled=false \
       --setParameter diagnosticDataCollectionEnabled=false \
-      --wiredTigerEngineConfigString "log=(prealloc=false,file_max=20MB)" \
       --binarypath $bindir --port $port "$@"
   fi
 }
