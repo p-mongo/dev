@@ -53,7 +53,7 @@ S
 
     check_call(['sh', '-c', <<S], cwd: cr_work_path)
         (git checkout build || git checkout -b build) &&
-        git reset --hard master
+        git reset --hard origin/master
 S
     check_call(['rsync', '-av', '--delete', '--exclude', '.git',
       self.class.work_path.to_s + '/', cr_work_path])
