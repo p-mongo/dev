@@ -83,7 +83,9 @@ class Tailer
       read_indices.each do |index, _|
         buffer = @buffers[index]
         lines = buffer.split("\n")
-        unless buffer.end_with?("\n")
+        if buffer.end_with?("\n")
+          @buffers[index] = ''
+        else
           @buffers[index] = lines.pop
         end
         ready_lines += lines.map { |line| Line.new(index, line) }
