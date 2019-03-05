@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'time'
+require 'byebug'
+
+class Line
+  def initialize(log_index, line)
+    @log_index = log_index
+    @line = line
+  end
+
+  attr_reader :log_index, :line
+
+  def timestamp
+    @timestamp ||= Time.parse(line.split(' ', 2).first).tap do |time|
+      unless time.is_a?(Time)
+        byebug
+        1
+      end
+    end
+  end
+end
+
+class Tailer
+  COLORS = [31, 33, 32]
+
+  def initialize(paths, options)
+    @paths = paths
+    @options = options
+
+    @offsets = [''] * paths.length
+
+    i = 0
+    @files = paths.map do |path|
+      File.open(path).tap do |file|
+        file.seek(0, IO::SEEK_END)
+        @offsets[i] = file.tell
+        i += 1
+      end
+    end
+
+    @buffers = [''] * paths.length
+  end
+
+  attr_reader :options
+
+  def tail
+    while true
+      read_indices = {}
+      fds = @files.map(&:fileno)
+      ready_reads, _, ready_errors = IO.select(@files, nil, @files)
+      ready_reads.each do |file|
+        index = nil
+        @files.each_with_index do |c_file, i|
+          if c_file == file
+            index = i
+            break
+          end
+        end
+
+        unless index
+          raise 'hmm'
+        end
+
+        begin
+          while chunk = file.read_nonblock(32768)
+            @buffers[index] << chunk
+            read_indices[index] = true
+          end
+        rescue EOFError
+        end
+
+      end
+
+      if read_indices.empty?
+        sleep 1
+        next
+      end
+
+      ready_lines = []
+
+      read_indices.each do |index, _|
+        buffer = @buffers[index]
+        lines = buffer.split("\n")
+        unless buffer.end_with?("\n")
+          @buffers[index] = lines.pop
+        end
+        ready_lines += lines.map { |line| Line.new(index, line) }
+      end
+
+      ready_lines.sort_by! { |line| line.timestamp }
+
+      ready_lines.each do |line|
+        if options[:grep]
+          unless line.line =~ /#{options[:grep]}/
+            next
+          end
+        end
+        puts colorize(line.log_index, "[#{line.log_index+1}] #{line.line}")
+      end
+    end
+  end
+
+  def colorize(index, str)
+    "\033[1;#{COLORS[index]}m#{str}\033[39;49m"
+  end
+end
+
+options = {}
+OptionParser.new do |opts|
+  opts.on('-g', '--grep=PATTERN', 'Grep for pattern') do |v|
+    options[:grep] = v
+  end
+end.parse!
+Tailer.new(ARGV, options).tail
