@@ -18,6 +18,7 @@ class Runner
 
   def run
     start_clusters
+    prepare_tests
     run_tests
   end
 
@@ -63,23 +64,31 @@ class Runner
     end
   end
 
-  def run_tests
-    cfg = generate_config
-    return
-    check_call(['rake', 'spec:prepare'], env: {'PARALLEL_CONFIGS' => cfg})
-    cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
-    return
-    check_call(cmd, env: {'PARALLEL_CONFIGS' => cfg})
+  def prepare_tests
+    config.each do |i, m|
+      puts "Preparing worker #{i}"
+      check_call(%w(rake spec:prepare), env: m)
+    end
   end
 
-  def generate_config
-    m = {}
-    1.upto(concurrency).each do |i|
-      m[i] = {
-        'MONGODB_URI' => "mongodb://localhost:#{27400+i*10},localhost:#{27401+i*10},localhost:#{27402+i*10}/?replicaSet=#{replica_set_name}",
-      }
+  def run_tests
+    puts "Running tests"
+    cmd = [options[:paraspec_path], '-c', concurrency.to_s] + ARGV
+    check_call(cmd, env: {'PARALLEL_CONFIGS' => serialized_config})
+  end
+
+  def config
+    @config ||= {}.tap do |m|
+      1.upto(concurrency).each do |i|
+        m[i] = {
+          'MONGODB_URI' => "mongodb://localhost:#{27400+i*10},localhost:#{27401+i*10},localhost:#{27402+i*10}/?replicaSet=#{replica_set_name}",
+        }
+      end
     end
-    m.to_json
+  end
+
+  def serialized_config
+    config.to_json
   end
 
   def replica_set_name
@@ -112,7 +121,10 @@ class Runner
 
   def kill
     @processes.each do |process|
-      p process
+      process.stop
+    end
+    @processes.each do |process|
+      process.wait
     end
   end
 end
