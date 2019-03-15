@@ -40,13 +40,13 @@ class Runner
         end
       end
 
-      dir = "/var/mongodb/4.0-rsp-#{i}"
+      dir = "/mnt/zram/mongodb/4.1-rsp-#{i}"
       if File.exist?(dir)
         cmd = mlaunch_cmd + ['start', '--dir', dir]
       else
         cmd = mlaunch_cmd + ['init', '--replicaset', '--name', replica_set_name,
           '--wiredTigerCacheSizeGB', '0.25', '--setParameter', 'enableTestCommands=1',
-          '--binarypath', '/usr/local/m/versions/4.0',
+          '--binarypath', '/usr/local/m/versions/4.1',
           '--port', (27400+i*10).to_s, '--dir', dir]
       end
       check_call(cmd)
