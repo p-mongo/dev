@@ -65,10 +65,12 @@ class Runner
   end
 
   def prepare_tests
+    specs = []
     config.each do |i, m|
-      puts "Preparing worker #{i}"
-      check_call(%w(rake spec:prepare), env: m)
+      specs << [%w(rake spec:prepare), {env: m}]
     end
+    puts "Preparing databases"
+    check_call_multi(specs)
   end
 
   def run_tests
@@ -116,6 +118,29 @@ class Runner
     process.wait
     unless process.exit_code == 0
       raise "Failed to execute: #{cmd}"
+    end
+  end
+
+  def check_call_multi(specs)
+    processes = []
+    specs.each do |spec|
+      arg, options = spec
+      process = ChildProcess.new(*arg)
+      process.io.inherit!
+      if env = options[:env]
+        env.each do |k, v|
+          process.environment[k.to_s] = v
+        end
+      end
+      process.start
+      processes << process
+    end
+
+    processes.each_with_index do |process, i|
+      process.wait
+      unless process.exit_code == 0
+        raise "Failed to execute: #{specs[i]}"
+      end
     end
   end
 
