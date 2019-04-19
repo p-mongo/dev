@@ -116,7 +116,7 @@ class DriverDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/ruby-driver'))
   self.docs_repo_url = 'https://github.com/mongodb/docs-ruby'
   self.output_subdir = 'driver'
-  self.version = '2.6.1'
+  self.version = '2.8.0.rc0'
 end
 
 class MongoidDocsBuilder < DocsBuilder
