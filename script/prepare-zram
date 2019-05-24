@@ -2,14 +2,24 @@
 
 set -e
 
+mem=`free --mega |grep Mem: |awk '{print $2}'`
+if test $mem > 30000; then
+  size=100g
+else
+  size=50g
+fi
+
 sudo modprobe zram
-dev=`sudo zramctl -f -s 50g`
+dev=`sudo zramctl -f -s $size`
 if ! echo "$dev" |grep -q ^/dev/zram; then
   echo "Bogus device $dev" 1>&2
   exit 3
 fi
-sudo mkfs.ext4 "$dev"
+sudo mkfs.xfs "$dev"
 sudo mkdir -p /mnt/zram
 sudo mount "$dev" /mnt/zram
 sudo mkdir /mnt/zram/mongodb
 sudo chown m:m /mnt/zram/mongodb
+
+sudo mkdir /mnt/zram/sandbox
+sudo chown sandbox /mnt/zram/sandbox
