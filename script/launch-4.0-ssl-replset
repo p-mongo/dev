@@ -10,7 +10,8 @@ dbdir=/mnt/zram/mongodb/4.0-ssl-rs
 bindir=/usr/bin
 port=27440
 launchargs="--replicaset --name ruby-driver-rs \
---sslMode requireSSL --sslPEMKeyFile `pwd`/cert/127.0.0.1.pem \
---sslAllowConnectionsWithoutCertificates"
+--sslMode requireSSL --sslPEMKeyFile `pwd`/cert/server-second-level-bundle.pem \
+--sslCAFile `pwd`/cert/ca.crt \
+--sslClientCertificate `pwd`/cert/client.pem"
 
 do_mlaunch "$@"

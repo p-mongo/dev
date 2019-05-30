@@ -1,11 +1,13 @@
 do_mlaunch() {
+  # 1024 was insufficient with retry reads on by default
+  ulimit -n 2000
   if test -d "$dbdir"; then
     if test -n "$1"; then
-      cmd=$1
+      cmd="$1"
       shift
-      mlaunch $cmd --dir $dbdir "$@"
+      mlaunch $cmd --dir "$dbdir" "$@"
     else
-      mlaunch start --dir $dbdir
+      mlaunch start --dir "$dbdir"
     fi
   else
   # 4.1 only
@@ -15,8 +17,11 @@ do_mlaunch() {
     mlaunch $launchargs --dir $dbdir \
       --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
       --setParameter diagnosticDataCollectionEnabled=false \
+      --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
   fi
+  
+  chmod -R go+rwX "$dbdir"
 }
 
 # --maxConns 200
