@@ -3,7 +3,7 @@
 set -e
 
 mem=`free --mega |grep Mem: |awk '{print $2}'`
-if test $mem > 30000; then
+if test `expr $mem \> 30000` = 1; then
   size=100g
 else
   size=50g
