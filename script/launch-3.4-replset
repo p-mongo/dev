@@ -2,13 +2,12 @@
 
 set -e
 
-dir=/mnt/zram/mongodb/3.4-rs
-bindir=/usr/local/m/versions/3.4.20/bin
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
 
-if test -d $dir; then
-  mlaunch start --dir $dir
-else
-  mlaunch --replicaset --dir $dir --name ruby-driver-rs \
-    --wiredTigerCacheSizeGB 1 --setParameter enableTestCommands=1 \
-    --binarypath $bindir --port 27340 "$@"
-fi
+dbdir=/mnt/zram/mongodb/3.4-rs
+bindir=/usr/local/m/versions/3.4.20/bin
+port=27340
+launchargs="--replicaset --name ruby-driver-rs"
+
+do_mlaunch "$@"
