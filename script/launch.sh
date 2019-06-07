@@ -10,11 +10,16 @@ do_mlaunch() {
       mlaunch start --dir "$dbdir"
     fi
   else
-  # 4.1 only
-  #    --setParameter ttlMonitorEnabled=false \
-  # https://github.com/rueckstiess/mtools/issues/683
-  #    --wiredTigerEngineConfigString "log=(prealloc=false,file_max=20MB)" \
-    mlaunch $launchargs --dir $dbdir \
+    params=
+    case `basename "$bindir"` in
+      4.1*)
+        params="$params --setParameter ttlMonitorEnabled=false"
+        # https://github.com/rueckstiess/mtools/issues/683
+        params="$params --wiredTigerEngineConfigString 'log=(prealloc=false,file_max=20MB)'"
+        ;;
+    esac
+
+    mlaunch $launchargs --dir $dbdir $params \
       --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
       --setParameter diagnosticDataCollectionEnabled=false \
       --filePermissions 0666 \

@@ -3,7 +3,7 @@
 set -e
 
 dir=/mnt/zram/mongodb/3.4-rs
-bindir=/usr/local/m/versions/3.4.18/bin
+bindir=/usr/local/m/versions/3.4.20/bin
 
 if test -d $dir; then
   mlaunch start --dir $dir
