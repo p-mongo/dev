@@ -13,9 +13,15 @@ do_mlaunch() {
     params=
     case `basename "$bindir"` in
       4.1*)
-        params="$params --setParameter ttlMonitorEnabled=false"
+        # ttlMonitorEnabled cannot be used when launching a sharded cluster.
+        if ! echo "$0" |grep -q sharded; then
+          params="$params --setParameter ttlMonitorEnabled=false"
+        fi
         # https://github.com/rueckstiess/mtools/issues/683
         params="$params --wiredTigerEngineConfigString 'log=(prealloc=false,file_max=20MB)'"
+        # not accepted by mongos
+        # https://jira.mongodb.org/browse/DOCS-12806
+        #params="$params --setParameter transactionLifetimeLimitSeconds=15"
         ;;
     esac
 
