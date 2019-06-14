@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+cd ~/apps/exp/mongo
+
+version="$1"
+if test -n "$version"; then
+  branch=master
+elif echo "$verson" |grep -q 4.2; then
+  branch=v4.2
+elif echo "$verson" |grep -q 4.0; then
+  branch=v4.0
+else
+  echo "Unknown version $version" 1>&2
+  exit 1
+fi
+
+git checkout $branch
+git pull
+
+# mongo mongobridge mongod mongos
+# requires python2 on 4.0 and python3 on 4.2
+nice ./buildscripts/scons.py --disable-warnings-as-errors -j20
+
+for i in mongo*; do
+  strip $i
+done
+
+subdir=`echo $branch |sed -e s/^v//`
+
+rsync -av ~/debs/mongo/$subdir/ ~/debs/mongo/$subdir-prev
+cp mongo* ~/debs/mongo/$subdir/
