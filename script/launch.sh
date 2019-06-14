@@ -22,6 +22,7 @@ do_mlaunch() {
         # not accepted by mongos
         # https://jira.mongodb.org/browse/DOCS-12806
         #params="$params --setParameter transactionLifetimeLimitSeconds=15"
+        # also https://github.com/rueckstiess/mtools/issues/696
         ;;
     esac
 
