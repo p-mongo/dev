@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.0-rs-mmap
+bindir=/usr/local/m/versions/4.0
+port=27110
+launchargs="--replicaset --name ruby-driver-rs --storageEngine mmapv1"
+
+do_mlaunch "$@"
