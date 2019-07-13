@@ -3,6 +3,7 @@
 set -e
 
 cd ~/apps/exp/mongo
+rm -rf build
 
 version="$1"
 if test -n "$version"; then
