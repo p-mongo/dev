@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.4-single
+bindir=/usr/local/m/versions/4.4
+port=14400
+launchargs="--single"
+
+do_mlaunch "$@"

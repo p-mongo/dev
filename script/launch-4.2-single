@@ -5,9 +5,9 @@ set -e
 dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
-dbdir=/mnt/zram/mongodb/4.1-single
-bindir=/usr/local/m/versions/4.1
-port=27740
+dbdir=/mnt/zram/mongodb/4.2-single
+bindir=/usr/local/m/versions/4.2
+port=14200
 launchargs="--single"
 
 do_mlaunch "$@"

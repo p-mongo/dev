@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.2-rs-auth
+bindir=/usr/local/m/versions/4.2
+port=14230
+launchargs="--replicaset --name ruby-driver-rs \
+--auth --username dev --password dev"
+
+do_mlaunch "$@"

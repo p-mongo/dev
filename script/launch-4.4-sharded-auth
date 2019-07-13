@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.4-sca
+bindir=/usr/local/m/versions/4.4
+port=14450
+launchargs="--replicaset --nodes 2 --sharded 2 --name ruby-driver-rs --mongos 2 \
+    --auth --username dev --password dev \
+"
+
+do_mlaunch "$@"
