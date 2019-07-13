@@ -21,13 +21,16 @@ git pull
 
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
-nice ./buildscripts/scons.py --disable-warnings-as-errors -j20
+nice ./buildscripts/scons.py --disable-warnings-as-errors -j20 core
 
 for i in mongo*; do
   strip $i
 done
 
 subdir=`echo $branch |sed -e s/^v//`
+if test $subdir = master; then
+  subdir=4.4
+fi
 
 rsync -av ~/debs/mongo/$subdir/ ~/debs/mongo/$subdir-prev
 cp mongo* ~/debs/mongo/$subdir/
