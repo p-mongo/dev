@@ -21,6 +21,11 @@ do_mlaunch() {
     if echo "$version" |grep -Eq '^(3.[246]|4)'; then
       params="$params --setParameter diagnosticDataCollectionEnabled=false"
     fi
+    if echo "$version" |grep -Eq '^(3.[46]|4)'; then
+      params="$params --wiredTigerCacheSizeGB 0.25"
+    elif echo "$version" |grep -Eq '^3'; then
+      params="$params --wiredTigerCacheSizeGB 1"
+    fi
     case "$version" in
       4.1*)
         # ttlMonitorEnabled cannot be used when launching a sharded cluster.
@@ -37,7 +42,7 @@ do_mlaunch() {
     esac
 
     mlaunch $launchargs --dir $dbdir $params \
-      --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
+      --setParameter enableTestCommands=1 \
       --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
   fi
