@@ -12,8 +12,16 @@ do_mlaunch() {
       mlaunch start --dir "$dbdir"
     fi
   else
+    if test `basename "$bindir"` = bin; then
+      version=$(basename $(dirname "$bindir"))
+    else
+      version=$(basename "$bindir")
+    fi
     params=
-    case `basename "$bindir"` in
+    if echo "$version" |grep -Eq '^(3.[246]|4)'; then
+      params="$params --setParameter diagnosticDataCollectionEnabled=false"
+    fi
+    case "$version" in
       4.1*)
         # ttlMonitorEnabled cannot be used when launching a sharded cluster.
         if ! echo "$0" |grep -q sharded; then
@@ -30,7 +38,6 @@ do_mlaunch() {
 
     mlaunch $launchargs --dir $dbdir $params \
       --wiredTigerCacheSizeGB 0.25 --setParameter enableTestCommands=1 \
-      --setParameter diagnosticDataCollectionEnabled=false \
       --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
   fi
