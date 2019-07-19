@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+require 'find'
+
+def process(path)
+  content = File.read(path)
+  content.gsub!(/# frozen_string_literal: true\n/, '')
+  content.gsub!(/# encoding: utf-8\n/, '')
+  content.strip!
+  content = "# frozen_string_literal: true\n# encoding: utf-8\n\n#{content}\n"
+  File.open(path, 'w') do |f|
+    f << content
+  end
+end
+
+Find.find('.') do |path|
+  if File.basename(path) == '.git'
+    Find.prune
+  end
+  if path =~ /\.rb$/
+    process(path)
+  end
+end
