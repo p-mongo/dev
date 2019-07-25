@@ -1,0 +1,51 @@
+#!/bin/sh
+
+set -e
+
+KEY=$HOME/.ssh/oleg-test.pem
+USER=admin
+HOST=3.17.158.130
+
+run() {
+  ssh -i $KEY -l $USER $HOST "$@"
+}
+
+run_root() {
+  ssh -i $KEY -l root $HOST "$@"
+}
+
+server_url=https://repo.mongodb.com/apt/debian/dists/stretch/mongodb-enterprise/testing/main/binary-amd64/mongodb-enterprise-server_4.2.0~rc4_amd64.deb
+mongos_url=https://repo.mongodb.com/apt/debian/dists/stretch/mongodb-enterprise/testing/main/binary-amd64/mongodb-enterprise-mongos_4.2.0~rc4_amd64.deb
+shell_url=https://repo.mongodb.com/apt/debian/dists/stretch/mongodb-enterprise/testing/main/binary-amd64/mongodb-enterprise-shell_4.2.0~rc4_amd64.deb
+dbroot=/var/mdb
+
+run "sudo cp /home/$USER/.ssh/authorized_keys /root/.ssh/authorized_keys"
+
+run_root "apt-get -y install zsh git python-pip"
+
+if false; then
+
+run_root "chsh -s /bin/zsh"
+run_root "chsh -s /bin/zsh $USER"
+for url in $server_url $mongos_url $shell_url; do
+  run_root "wget -c $url && dpkg -i $(basename $url) || apt-get -yf install"
+done
+
+#run_root "mkdir -p /usr/local/m && chown $USER:$USER /usr/local/m"
+
+#run "if test -d m; then (cd m && git pull); else git clone https://github.com/aheckmann/m; fi"
+
+#run_root "install -m 555 /home/$USER/m/bin/m /usr/local/bin"
+
+#run "m 4.2-ent"
+
+run "pip install 'mtools[mlaunch]' --user"
+run "grep -q '\.local/bin' ~/.zshenv 2>/dev/null || echo 'export PATH=~/.local/bin:\$PATH' >> ~/.zshenv"
+
+run_root "mkdir -p $dbroot && chown $USER:$USER $dbroot"
+
+run "mlaunch --replicaset --hostname $HOST --bind_ip_all --dir $dbroot/rs"
+
+fi
+
+echo "mongodb://$HOST:27017,$HOST:27018,$HOST:27019/?replicaSet=replset"
