@@ -4,7 +4,15 @@ do_mlaunch() {
   # 1024 was insufficient with retry reads on by default
   ulimit -n 2000
   if test -d "$dbdir"; then
-    if test -n "$1"; then
+    if test "$1" = restart; then
+      for f in `find "$dbdir" -name \*pid`; do
+        kill -9 `cat "$f"`
+      done
+      for kill_port in `seq $port $(expr $port + 9)`; do
+        ps awwxu |grep $kill_port |awk '{print $2}' |xargs kill -9 2>/dev/null || true
+      done
+      mlaunch start --dir "$dbdir"
+    elif test -n "$1"; then
       cmd="$1"
       shift
       mlaunch $cmd --dir "$dbdir" "$@"
