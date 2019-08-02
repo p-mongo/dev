@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+port=$1
+if test -z "$port"; then
+  echo "Port is required" 1>&2
+  exit 2
+fi
+
+sudo iptables -D INPUT -p tcp --destination-port "$port" -j DROP
