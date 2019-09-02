@@ -1,3 +1,8 @@
+announce() {
+  echo "Running $@"
+  eval "$@"
+}
+
 do_mlaunch() {
   echo "Base port: $port"
   
@@ -49,7 +54,7 @@ do_mlaunch() {
         ;;
     esac
 
-    mlaunch $launchargs --dir $dbdir $params \
+    announce mlaunch $launchargs --dir $dbdir $params \
       --setParameter enableTestCommands=1 \
       --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
