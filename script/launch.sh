@@ -9,7 +9,10 @@ do_mlaunch() {
   # 1024 was insufficient with retry reads on by default
   ulimit -n 2000
   if test -d "$dbdir"; then
-    if test "$1" = restart; then
+    if test "$1" = rm; then
+      rm -rf "$dbdir"
+      return
+    elif test "$1" = restart; then
       for f in `find "$dbdir" -name \*pid`; do
         kill -9 `cat "$f"`
       done
