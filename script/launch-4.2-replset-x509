@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.2-rs-x509
+bindir=/usr/local/m/versions/4.2
+port=14480
+launchargs="--replicaset --name ruby-driver-rs \
+--auth --username dev --password dev \
+--sslMode requireSSL \
+--sslPEMKeyFile $dir/../../ruby-driver/spec/support/certificates/server.pem \
+--sslClientCertificate $dir/../../ruby-driver/spec/support/certificates/client.pem \
+--sslCAFile $dir/../../ruby-driver/spec/support/certificates/ca.crt \
+"
+
+do_mlaunch "$@"
+
+create_user_cmd="`cat <<'EOT'
+  db.getSiblingDB("$external").runCommand(
+    {
+      createUser: "C=US,ST=New York,L=New York City,O=MongoDB,OU=x509,CN=localhost",
+      roles: [
+           { role: "dbAdminAnyDatabase", db: "admin" },
+           { role: "readWriteAnyDatabase", db: "admin" },
+           { role: "userAdminAnyDatabase", db: "admin" },
+           { role: "clusterAdmin", db: "admin" },
+      ],
+      writeConcern: { w: "majority" , wtimeout: 5000 },
+    }
+  )
+EOT
+`"
+
+$bindir/mongo --tls --port $port \
+  --sslPEMKeyFile $dir/../../ruby-driver/spec/support/certificates/server.pem \
+  --sslCAFile $dir/../../ruby-driver/spec/support/certificates/ca.crt \
+  -u dev -p dev --eval "$create_user_cmd"
