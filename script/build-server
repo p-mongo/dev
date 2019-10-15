@@ -6,7 +6,7 @@ cd ~/apps/exp/mongo
 rm -rf build
 
 version="$1"
-if test -z "$version"; then
+if test -z "$version" || test "$version" = master; then
   branch=master
 elif echo "$version" |grep -q 4.2; then
   branch=v4.2
@@ -16,6 +16,9 @@ else
   echo "Unknown version $version" 1>&2
   exit 1
 fi
+
+(cd ~/apps/exp/mongo-enterprise-modules && git fetch origin &&
+git checkout origin/$branch)
 
 git checkout $branch
 git pull
