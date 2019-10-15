@@ -1,6 +1,8 @@
 announce() {
   echo "Running $@"
-  eval "$@"
+  cmd=$1
+  shift
+  $cmd "$@"
 }
 
 do_mlaunch() {
