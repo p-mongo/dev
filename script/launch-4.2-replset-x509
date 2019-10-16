@@ -38,3 +38,5 @@ $bindir/mongo --tls --port $port \
   --sslPEMKeyFile $dir/../../ruby-driver/spec/support/certificates/server.pem \
   --sslCAFile $dir/../../ruby-driver/spec/support/certificates/ca.crt \
   -u dev -p dev --eval "$create_user_cmd"
+
+# MONGODB_URI=mongodb://localhost:14480'/?tls=true&authMechanism=MONGODB-X509&tls=true&tlsCAFile=spec/support/certificates/ca.crt&tlsCertificateKeyFile=spec/support/certificates/client-x509.pem'
