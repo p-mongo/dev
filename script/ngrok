@@ -5,13 +5,13 @@ set -e
 mkdir ra
 cd ra
 
+pwd=`pwd`
+export HOME=$pwd
+
 url=https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
 
 curl -o `basename $url` $url
 unzip `basename $url`
-
-pwd=`pwd`
-export HOME=$pwd
 
 ssh-keygen -t rsa -f $pwd/ssh_host_rsa_key -N ''
 
