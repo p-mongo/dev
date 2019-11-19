@@ -19,7 +19,7 @@ cat <<EOT >sshd_config
 Port 20220
 ListenAddress 0.0.0.0
 HostKey $pwd/ssh_host_rsa_key
-PermitRootLogin no
+PermitRootLogin yes
 AuthorizedKeysFile $pwd/authorized_keys
 PasswordAuthentication no
 ChallengeResponseAuthentication no
