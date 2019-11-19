@@ -44,4 +44,4 @@ EOT
 
 (while true; do curl -v localhost:4040/api/tunnels; sleep 1; done) &
 
-./ngrok start --config ngrok.conf --all
+./ngrok start --config ngrok.conf --all |cat
