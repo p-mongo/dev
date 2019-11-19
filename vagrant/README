@@ -1,0 +1,4 @@
+Instructions:
+
+- install libvirt-daemon and/or virt-manage (?)
+- add login user to libvirt group
