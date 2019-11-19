@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -e
+
+mkdir ra
+cd ra
+
+url=https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+
+curl -o `basename $url` $url
+unzip `basename $url`
+
+pwd=`pwd`
+export HOME=$pwd
+
+ssh-keygen -t rsa -f $pwd/ssh_host_rsa_key -N ''
+
+cat <<EOT >sshd_config
+Port 20220
+ListenAddress 0.0.0.0
+HostKey $pwd/ssh_host_rsa_key
+PermitRootLogin no
+AuthorizedKeysFile $pwd/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+PubkeyAuthentication yes
+X11Forwarding no
+EOT
+
+cat <<EOT >authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnJFQKdVbNiUN2/Toq3YW7xEJ7KntA8bM7FCppjHvjRn1rsVLm1FUTm9fasjyZwp2GIKaAEli2iaatRpTv9+HYjAy8iqkGLVJpqZNiaVvN+NmZtqvzpcOoTc5r5X25Lfn3I7U/m/6H5Isk/21mqfMLDpOC+bY+1lyDIm5795wZPwv8C4RM5DDFuc+LC2kGB0eOt5c/NDA+IB/ekoPubKbUbwCD/z5tF2jBISYxi9ozb9NmH/Vgyt/mIvmMtqJvzVk1a4H5hvH239wQf9CeszHBmFQM5avQI+y1Qzoj0u6aGbs5CAqSVt6XazpCoLi3lqA6+qYGbPoaladUB4qsDaYB w@averagest
+EOT
+chmod 0600 authorized_keys
+
+`which sshd` -f sshd_config -D &
+
+cat <<EOT >ngrok.conf
+authtoken: 1Tqymp55wca3UsdhaWtVXamLY4N_5WsxXASymhHZ19U2tkuyc
+tunnels:
+  ssh:
+    addr: 22
+    proto: tcp
+EOT
+
+./ngrok start --config ngrok.conf --all
