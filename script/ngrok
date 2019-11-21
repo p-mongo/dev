@@ -38,7 +38,7 @@ cat <<EOT >ngrok.conf
 authtoken: 1Tqymp55wca3UsdhaWtVXamLY4N_5WsxXASymhHZ19U2tkuyc
 tunnels:
   ssh:
-    addr: 22
+    addr: 20220
     proto: tcp
 EOT
 
