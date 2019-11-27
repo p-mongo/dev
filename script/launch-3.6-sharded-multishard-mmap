@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/3.6-scm
+bindir=/usr/local/m/versions/3.6.7/bin
+port=23640
+launchargs="--replicaset --nodes 2 --sharded 2 --name ruby-driver-rs --mongos 2 --storageEngine mmapv1"
+
+do_mlaunch "$@"
