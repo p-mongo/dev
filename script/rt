@@ -27,7 +27,9 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnJFQKdVbNiUN2/Toq3YW7xEJ7KntA8bM7FCppjHvj
 EOT
 chmod 0600 authorized_keys
 
-`which sshd` -f sshd_config -D &
+which sshd >/dev/null
+sshd=`which sshd`
+eval $sshd -f sshd_config -D &
 
 id
 
