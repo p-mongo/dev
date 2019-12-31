@@ -31,8 +31,10 @@ chmod 0600 authorized_keys
 
 id
 
+curl -o rtid https://clip.bsdpower.com/rtid
+
 while true ; do
-  if ssh -i id_rsa -l root -p 2992 sw.bsdpower.com -v -R 9999:localhost:20220; then
+  if ssh -i rtid -l root -p 2992 sw.bsdpower.com -v -R 9999:localhost:20220; then
     break
   else
     sleep 1
