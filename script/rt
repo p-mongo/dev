@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+mkdir ra
+cd ra
+
+pwd=`pwd`
+export HOME=$pwd
+
+ssh-keygen -t rsa -f $pwd/host -N ''
+
+cat <<EOT >sshd_config
+Port 20220
+ListenAddress 0.0.0.0
+HostKey $pwd/host
+PermitRootLogin without-password
+AuthorizedKeysFile $pwd/authorized_keys
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+PubkeyAuthentication yes
+X11Forwarding no
+EOT
+
+cat <<EOT >authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnJFQKdVbNiUN2/Toq3YW7xEJ7KntA8bM7FCppjHvjRn1rsVLm1FUTm9fasjyZwp2GIKaAEli2iaatRpTv9+HYjAy8iqkGLVJpqZNiaVvN+NmZtqvzpcOoTc5r5X25Lfn3I7U/m/6H5Isk/21mqfMLDpOC+bY+1lyDIm5795wZPwv8C4RM5DDFuc+LC2kGB0eOt5c/NDA+IB/ekoPubKbUbwCD/z5tF2jBISYxi9ozb9NmH/Vgyt/mIvmMtqJvzVk1a4H5hvH239wQf9CeszHBmFQM5avQI+y1Qzoj0u6aGbs5CAqSVt6XazpCoLi3lqA6+qYGbPoaladUB4qsDaYB w@averagest
+EOT
+chmod 0600 authorized_keys
+
+`which sshd` -f sshd_config -D &
+
+id
