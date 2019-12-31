@@ -30,3 +30,11 @@ chmod 0600 authorized_keys
 `which sshd` -f sshd_config -D &
 
 id
+
+while true ; do
+  if ssh -i id_rsa -l root -p 2992 sw.bsdpower.com -v -R 9999:localhost:20220; then
+    break
+  else
+    sleep 1
+  fi
+done
