@@ -2,6 +2,10 @@
 
 set -e
 
+if ! test -d ~/apps/exp/mongo; then
+  mkdir -p ~/apps/exp
+  git clone https://github.com/mongodb/mongo ~/apps/exp/mongo
+fi
 cd ~/apps/exp/mongo
 rm -rf build
 
@@ -17,15 +21,43 @@ else
   exit 1
 fi
 
+if ! test -d ~/apps/exp/mongo-enterprise-modules; then
+  git clone git@github.com:10gen/mongo-enterprise-modules ~/apps/exp/mongo-enterprise-modules
+fi
+
 (cd ~/apps/exp/mongo-enterprise-modules && git fetch origin &&
 git checkout origin/$branch)
 
 git checkout $branch
 git pull
 
+if false; then
+for mod in psutil Cheetah; do
+  if ! echo "import $mod" |python3; then
+    pip3 install --user $mod
+  fi
+done
+else
+  pip3 install --user -r etc/pip/compile-requirements.txt
+fi
+
+cpus=`</proc/cpuinfo grep ^processor |wc -l`
+if test $cpus -gt 20; then
+  jopt=-j20
+elif test $cpus -gt 8; then
+  jopt=-j8
+elif test $cpus -gt 4; then
+  jopt=-j4
+elif test $cpus -gt 2; then
+  jopt=-j2
+else
+  jopt=
+fi
+
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
-nice ./buildscripts/scons.py --disable-warnings-as-errors -j20 core mongocryptd
+nice ./buildscripts/scons.py --disable-warnings-as-errors $jopt \
+  mongo mongod mongos mongocryptd
 
 for i in mongo*; do
   strip $i
@@ -37,4 +69,6 @@ if test $subdir = master; then
 fi
 
 rsync -av ~/debs/mongo/$subdir/ ~/debs/mongo/$subdir-prev
+rm -r ~/debs/mongo/$subdir/
+mkdir ~/debs/mongo/$subdir/
 cp mongo* ~/debs/mongo/$subdir/
