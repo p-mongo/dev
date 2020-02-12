@@ -1,0 +1,3 @@
+#!/bin/sh
+
+(cd && tar cf - .ssh/id*) |vagrant ssh -c 'tar xf -'
