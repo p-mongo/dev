@@ -2,6 +2,10 @@
 
 set -e
 
+# Dependencies:
+#
+# apt-get install gcc-8 python3-pip
+
 if ! test -d ~/apps/exp/mongo; then
   mkdir -p ~/apps/exp
   git clone https://github.com/mongodb/mongo ~/apps/exp/mongo
