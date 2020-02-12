@@ -31,7 +31,6 @@ fi
 git checkout $branch)
 
 git checkout $branch
-git pull
 
 if false; then
 for mod in psutil Cheetah; do
