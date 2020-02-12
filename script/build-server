@@ -12,6 +12,8 @@ rm -rf build
 version="$1"
 if test -z "$version" || test "$version" = master; then
   branch=master
+elif echo "$version" |grep -q ^r; then
+  branch=$version
 elif echo "$version" |grep -q 4.2; then
   branch=v4.2
 elif echo "$version" |grep -q 4.0; then
