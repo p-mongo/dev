@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Server build instructions:
+# https://github.com/mongodb/mongo/blob/master/docs/building.md
+# https://github.com/mongodb/mongo/wiki/Build-Mongodb-From-Source
+# https://jira.mongodb.org/browse/HELP-13886
+
 set -e
 
 # Dependencies:
