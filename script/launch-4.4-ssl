@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.4-ssl
+bindir=/usr/local/m/versions/4.4
+port=14401
+launchargs="--single --tlsMode requireTLS \
+--sslPEMKeyFile $dir/../../ruby-driver/spec/support/certificates/server.pem \
+--sslClientCertificate $dir/../../ruby-driver/spec/support/certificates/client.pem \
+--sslCAFile $dir/../../ruby-driver/spec/support/certificates/ca.crt \
+"
+
+do_mlaunch "$@"
