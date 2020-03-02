@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+
+evergreen patch -p mongo-ruby-driver-atlas -v all -t all -y -d "patch at `date`" -f
