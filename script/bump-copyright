@@ -3,10 +3,10 @@
 require 'find'
 
 Find.find('.') do |path|
-  if path.end_with?('.rb')
+  if path =~ /\.(rb|c|h|java)$/
     c = File.read(path).force_encoding('utf-8')
-    c.sub!(/(\d{4})-\d{4} MongoDB Inc./, '\1-2020 MongoDB Inc.')
-    c.sub!(/ (\d{4}) MongoDB Inc./, ' \1-2020 MongoDB Inc.')
+    c.sub!(/(\d{4})-\d{4} MongoDB,? Inc./, '\1-2020 MongoDB Inc.')
+    c.sub!(/ (\d{4}) MongoDB,? Inc./, ' \1-2020 MongoDB Inc.')
     c.sub!(/ 2020-2020 MongoDB Inc./, ' 2020 MongoDB Inc.')
     File.open(path, 'w') do |f|
       f << c
