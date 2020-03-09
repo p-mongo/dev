@@ -14,6 +14,8 @@ set -e
 if ! test -d ~/apps/exp/mongo; then
   mkdir -p ~/apps/exp
   git clone https://github.com/mongodb/mongo ~/apps/exp/mongo
+else
+  (cd ~/apps/exp/mongo && git fetch origin)
 fi
 cd ~/apps/exp/mongo
 rm -rf build
@@ -23,13 +25,16 @@ if test -z "$version" || test "$version" = master; then
   branch=origin/master
 elif echo "$version" |grep -q ^r; then
   branch=$version
-elif echo "$version" |grep -q 4.2; then
-  branch=origin/v4.2
+elif echo "$version" |grep -q 4.4; then
+  branch=origin/v4.4
+elif echo "$version" |grep -q 4.4; then
+  branch=origin/v4.4
 elif echo "$version" |grep -q 4.0; then
   branch=origin/v4.0
 else
-  echo "Unknown version $version" 1>&2
-  exit 1
+  #echo "Unknown version $version" 1>&2
+  #exit 1
+  branch=origin/$version
 fi
 
 if ! test -d ~/apps/exp/mongo-enterprise-modules; then
