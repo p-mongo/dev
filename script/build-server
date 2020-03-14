@@ -48,8 +48,8 @@ git checkout $branch
 
 if echo $version |fgrep -q 4.0; then
   for mod in psutil Cheetah; do
-    if ! echo "import $mod" |python3; then
-      pip3 install --user $mod
+    if ! echo "import $mod" |python; then
+      pip install --user $mod
     fi
   done
 else
