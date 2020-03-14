@@ -37,14 +37,19 @@ else
   branch=origin/$version
 fi
 
-if ! test -d ~/apps/exp/mongo-enterprise-modules; then
+if test -d ~/apps/exp/mongo-enterprise-modules; then
+  (cd ~/apps/exp/mongo-enterprise-modules && git fetch origin)
+else
   git clone git@github.com:10gen/mongo-enterprise-modules ~/apps/exp/mongo-enterprise-modules
 fi
 
-(cd ~/apps/exp/mongo-enterprise-modules && git fetch origin &&
+(cd ~/apps/exp/mongo-enterprise-modules &&
 git checkout $branch)
 
 git checkout $branch
+
+mkdir src/mongo/db/modules/
+ln -sf ~/mongo-enterprise-modules src/mongo/db/modules/enterprise
 
 if echo $version |fgrep -q 4.0; then
   pip install --user -r buildscripts/requirements.txt
