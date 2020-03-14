@@ -9,7 +9,8 @@ RUN apt-get -y upgrade
 RUN apt-get -y dist-upgrade
 RUN apt-get -y install ssh python3-pip python3-setuptools python3-dev \
   python3-wheel gcc g++ libssl-dev libcurl4-openssl-dev liblzma-dev nvi \
-  python-pip python-setuptools python-dev build-essential \
+  python-pip python-setuptools python-dev build-essential libsnmp-dev \
+  libsasl-dev libsasl2-dev libldap2-dev libkrb5-dev \
   libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-thread-dev
 
 # https://stackoverflow.com/questions/13363553/git-error-host-key-verification-failed-when-connecting-to-remote-repository

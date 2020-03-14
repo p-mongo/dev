@@ -76,7 +76,7 @@ if ! echo $version |fgrep -q 4.0; then
 fi
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
-nice ./buildscripts/scons.py --disable-warnings-as-errors $jopt $targets
+nice ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt $targets
 
 for i in $targets; do
   strip $i
