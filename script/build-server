@@ -48,7 +48,7 @@ git checkout $branch)
 
 git checkout $branch
 
-mkdir src/mongo/db/modules/
+mkdir -p src/mongo/db/modules/
 ln -sf ~/apps/exp/mongo-enterprise-modules src/mongo/db/modules/enterprise
 
 if echo $version |fgrep -q 4.0; then
