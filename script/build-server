@@ -65,12 +65,15 @@ else
   jopt=
 fi
 
+targets="mongo mongod mongos"
+if ! echo $version |fgrep -q 4.0; then
+  targets="$targets mongocryptd"
+fi
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
-nice ./buildscripts/scons.py --disable-warnings-as-errors $jopt \
-  mongo mongod mongos mongocryptd
+nice ./buildscripts/scons.py --disable-warnings-as-errors $jopt $targets
 
-for i in mongo*; do
+for i in $targets; do
   strip $i
 done
 
