@@ -22,6 +22,7 @@ RUN git clone https://github.com/mongodb/mongo /root/apps/exp/mongo
 
 RUN apt-get -y install python3-pip python3-setuptools python3-dev
 RUN apt-get -y install python3-wheel gcc g++
-RUN apt-get -y install libssl-dev libcurl4-openssl-dev liblzma-dev nvi
+RUN apt-get -y install libssl-dev libcurl4-openssl-dev liblzma-dev nvi \
+  python-pip python-setuptools python-dev
 
 #RUN ./script/build-server r4.3.4
