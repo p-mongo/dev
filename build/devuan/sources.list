@@ -1,0 +1,2 @@
+deb http://us.deb.devuan.org/merged testing main contrib non-free
+deb-src http://us.deb.devuan.org/merged testing main contrib non-free
