@@ -6,7 +6,7 @@ dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
 dbdir=/var/mongodb/system
-bindir=/usr/local/m/versions/4.0
+bindir=/usr/local/m/versions/4.2
 port=27027
 launchargs="--single --wiredTigerCacheSizeGB 0.5 --setParameter enableTestCommands=0"
 

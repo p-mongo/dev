@@ -8,7 +8,7 @@ do_mlaunch() {
   
   # 1024 was insufficient with retry reads on by default
   ulimit -n 2000
-  if test -d "$dbdir"; then
+  if test -f "$dbdir"/.mlaunch_startup; then
     if test "$1" = rm; then
       rm -rf "$dbdir"
       return
@@ -37,10 +37,12 @@ do_mlaunch() {
     if echo "$version" |grep -Eq '^(3.[246]|4)'; then
       params="$params --setParameter diagnosticDataCollectionEnabled=false"
     fi
-    if echo "$version" |grep -Eq '^(3.[46]|4)'; then
-      params="$params --wiredTigerCacheSizeGB 0.25"
-    elif echo "$version" |grep -Eq '^3'; then
-      params="$params --wiredTigerCacheSizeGB 1"
+    if ! echo "$launchargs" |grep -q -- --wiredTigerCacheSizeGB; then
+      if echo "$version" |grep -Eq '^(3.[46]|4)'; then
+        params="$params --wiredTigerCacheSizeGB 0.25"
+      elif echo "$version" |grep -Eq '^3'; then
+        params="$params --wiredTigerCacheSizeGB 1"
+      fi
     fi
     if echo "$version" |grep -Eq '^(3.6|4)'; then
       params="$params --setParameter honorSystemUmask=true"
@@ -57,9 +59,11 @@ do_mlaunch() {
       #params="$params --setParameter transactionLifetimeLimitSeconds=15"
       # also https://github.com/rueckstiess/mtools/issues/696
     fi
+    if ! echo "$launchargs" |grep -q enableTestCommands; then
+      $params="$params --setParameter enableTestCommands=1"
+    fi
 
     announce mlaunch $launchargs --dir $dbdir $params \
-      --setParameter enableTestCommands=1 \
       --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
   fi
