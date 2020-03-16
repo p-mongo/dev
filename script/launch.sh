@@ -60,7 +60,7 @@ do_mlaunch() {
       # also https://github.com/rueckstiess/mtools/issues/696
     fi
     if ! echo "$launchargs" |grep -q enableTestCommands; then
-      $params="$params --setParameter enableTestCommands=1"
+      params="$params --setParameter enableTestCommands=1"
     fi
 
     announce mlaunch $launchargs --dir $dbdir $params \
