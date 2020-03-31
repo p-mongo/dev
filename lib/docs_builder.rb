@@ -31,26 +31,31 @@ class DocsBuilder
 
     dr_work_path = self.class.build_root.join(bn)
     if File.exist?(dr_work_path)
+      puts "Updating docs git repo"
       check_call(['sh', '-c', <<S], cwd: dr_work_path)
         git checkout master &&
         git fetch origin &&
         git reset --hard origin/master
 S
     else
+      puts "Cloning docs git repo"
       check_call(%w(git clone) + [self.class.docs_repo_url, dr_work_path])
     end
 
     cr_work_path = self.class.build_root.join('repo')
     if File.exist?(cr_work_path)
+      puts "Updating project git repo"
       check_call(['sh', '-c', <<S], cwd: cr_work_path)
         git checkout master &&
         git fetch origin &&
         git reset --hard origin/master
 S
     else
+      puts "Cloning project git repo"
       check_call(%w(git clone) + [self.class.work_path, cr_work_path])
     end
 
+    puts "Building documentation"
     check_call(['sh', '-c', <<S], cwd: cr_work_path)
         (git checkout build || git checkout -b build) &&
         git reset --hard origin/master
