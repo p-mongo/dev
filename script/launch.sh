@@ -1,3 +1,6 @@
+# Configure log verbosity:
+# https://docs.mongodb.com/manual/reference/log-messages/#log-messages-configure-verbosity
+
 announce() {
   echo "Running $@"
   eval "$@"
