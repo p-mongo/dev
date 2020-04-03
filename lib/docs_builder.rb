@@ -16,13 +16,20 @@ class DocsBuilder
 
   def setup
     FileUtils.mkdir_p(self.class.build_root)
-    FileUtils.mkdir_p(self.class.web_root)
+    if File.exist?(self.class.web_root)
+      check_call(%w(git fetch origin), cwd: self.class.web_root)
+      check_call(%w(git checkout master), cwd: self.class.web_root)
+      check_call(%w(git reset --hard origin/master), cwd: self.class.web_root)
+    else
+      check_call(%w(git clone git@github.com:p-mongo/rendered-docs) + [self.class.web_root])
+    end
   end
 
   def build
     setup
     build_tutorial
     build_yardocs
+    commit_and_push
   end
 
   def build_tutorial
@@ -97,8 +104,8 @@ S
     FileUtils.mkdir_p(web_root.join(output_subdir))
 
     names = Dir.glob('*.gemspec', base: work_path)
-    unless names.length != 1
-      raise "Found #{globs.length} in #{work_path} when expected 1"
+    if names.length != 1
+      raise "Found #{names.length} in #{work_path} when expected 1"
     end
     gemspec_basename = names.first
     gemspec = eval(File.read(work_path.join(gemspec_basename)))
@@ -106,6 +113,12 @@ S
 
     check_call(['rsync', '-av', '--delete', yard_docs_path.join(version).to_s + '/',
       web_root.join(output_subdir, 'api')])
+  end
+
+  def commit_and_push
+    check_call(%w(git add .), cwd: self.class.web_root)
+    check_call(%w(git commit -m) + ["#{File.basename(work_path)} built"], cwd: self.class.web_root)
+    check_call(%w(git push), cwd: self.class.web_root)
   end
 
   def check_call(cmd, env: nil, cwd: nil)
