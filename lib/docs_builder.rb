@@ -10,7 +10,6 @@ class DocsBuilder
   class_attribute :build_root
   class_attribute :web_root
   class_attribute :output_subdir
-  class_attribute :version
 
   self.build_root = Pathname.new(File.expand_path('~/tmp/docs-build'))
   self.web_root = Pathname.new(File.expand_path('~/tmp/docs-web'))
@@ -92,9 +91,20 @@ S
   end
 
   def build_yardocs
+    yard_docs_path = work_path.join('yard-docs')
+    #FileUtils.rm_rf(yard_docs_path)
     check_call(%w(rake docs), cwd: work_path)
     FileUtils.mkdir_p(web_root.join(output_subdir))
-    check_call(['rsync', '-av', '--delete', work_path.join('yard-docs', version).to_s + '/',
+
+    names = Dir.glob('*.gemspec', base: work_path)
+    unless names.length != 1
+      raise "Found #{globs.length} in #{work_path} when expected 1"
+    end
+    gemspec_basename = names.first
+    gemspec = eval(File.read(work_path.join(gemspec_basename)))
+    version = gemspec.version.to_s
+
+    check_call(['rsync', '-av', '--delete', yard_docs_path.join(version).to_s + '/',
       web_root.join(output_subdir, 'api')])
   end
 
@@ -121,12 +131,10 @@ class DriverDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/ruby-driver'))
   self.docs_repo_url = 'https://github.com/mongodb/docs-ruby'
   self.output_subdir = 'driver'
-  self.version = '2.8.0.rc0'
 end
 
 class MongoidDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/mongoid'))
   self.docs_repo_url = 'https://github.com/mongodb/docs-mongoid'
   self.output_subdir = 'mongoid'
-  self.version = '7.1.0'
 end
