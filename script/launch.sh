@@ -1,5 +1,9 @@
 # Configure log verbosity:
 # https://docs.mongodb.com/manual/reference/log-messages/#log-messages-configure-verbosity
+#
+# Reduce noop writer interval in sharded clusters to make tests run faster
+# (presumably at the cost of more cpu usage overall):
+# https://github.com/mongodb/specifications/pull/785/files
 
 announce() {
   echo "Running $@"
