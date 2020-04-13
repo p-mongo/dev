@@ -5,9 +5,11 @@ set -e
 dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
-dbdir=/mnt/zram/mongodb/4.4-single
+dbdir=/mnt/zram/mongodb/4.4-single-aws
 bindir=/usr/local/m/versions/4.4
-port=14400
-launchargs="--single"
+port=14401
+launchargs="--single \
+--setParameter authenticationMechanisms=SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-AWS \
+--auth --user dev --password dev"
 
 do_mlaunch "$@"
