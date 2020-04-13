@@ -14,7 +14,9 @@ do_mlaunch() {
   echo "Base port: $port"
   
   # 1024 was insufficient with retry reads on by default
-  ulimit -n 2000
+  if test `ulimit -n` -le 2000; then
+    ulimit -n 2000
+  fi
   if test -f "$dbdir"/.mlaunch_startup; then
     if test "$1" = rm; then
       rm -rf "$dbdir"
