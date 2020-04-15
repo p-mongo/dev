@@ -7,7 +7,7 @@ dir="`dirname "$0"`"
 
 dbdir=/mnt/zram/mongodb/3.2-rs
 bindir=/usr/local/m/versions/3.2.22/bin
-port=27320
+port=13220
 launchargs="--replicaset --name ruby-driver-rs"
 
 do_mlaunch "$@"
