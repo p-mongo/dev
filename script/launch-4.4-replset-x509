@@ -5,9 +5,9 @@ set -e
 dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
-dbdir=/mnt/zram/mongodb/4.2-rs-x509
-bindir=/usr/local/m/versions/4.2
-port=14280
+dbdir=/mnt/zram/mongodb/4.4-rs-x509
+bindir=/usr/local/m/versions/4.4
+port=14480
 launchargs="--replicaset --name ruby-driver-rs \
 --auth --username dev --password dev \
 --sslMode requireSSL \
