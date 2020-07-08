@@ -62,7 +62,7 @@ do_mlaunch() {
         params="$params --setParameter ttlMonitorEnabled=false"
       fi
       # https://github.com/rueckstiess/mtools/issues/683
-      params="$params --wiredTigerEngineConfigString 'log=(prealloc=false,file_max=20MB),cache_size=64M'"
+      params="$params --wiredTigerEngineConfigString 'log=(prealloc=false,file_max=20MB),cache_size=256M'"
       # not accepted by mongos
       # https://jira.mongodb.org/browse/DOCS-12806
       #params="$params --setParameter transactionLifetimeLimitSeconds=15"
