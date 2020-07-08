@@ -9,7 +9,8 @@ set -e
 
 # Dependencies:
 #
-# apt-get install gcc-8 g++-8 python3-pip libssl-dev libcurl4-openssl-dev
+# apt-get install gcc-8 g++-8 python3-pip libssl-dev libcurl4-openssl-dev \
+#   libsnmp-dev libsasl2-dev libcurl4-gnutls-dev libldap2-dev libkrb5-dev
 
 if ! test -d ~/apps/exp/mongo; then
   mkdir -p ~/apps/exp
@@ -27,8 +28,8 @@ elif echo "$version" |grep -q ^r; then
   branch=$version
 elif echo "$version" |grep -q 4.4; then
   branch=origin/v4.4
-elif echo "$version" |grep -q 4.4; then
-  branch=origin/v4.4
+elif echo "$version" |grep -q 4.2; then
+  branch=origin/v4.2
 elif echo "$version" |grep -q 4.0; then
   branch=origin/v4.0
 else
@@ -51,28 +52,28 @@ git checkout $branch
 mkdir -p src/mongo/db/modules/
 ln -sf ~/apps/exp/mongo-enterprise-modules src/mongo/db/modules/enterprise
 
-if echo $version |fgrep -q 4.0; then
+if echo $version |egrep -q '^r?4.0'; then
   pip install --user -r buildscripts/requirements.txt
-else
+elif echo $version |egrep -q '^r?4'; then
   pip3 install --user -r etc/pip/compile-requirements.txt
+else
+  :
 fi
 
-cpus=`</proc/cpuinfo grep ^processor |wc -l`
+cpus=`grep ^cpu.cores /proc/cpuinfo |awk -F: '{print $2}' |head -1`
 if test $cpus -gt 20; then
   jopt=-j20
-elif test $cpus -gt 8; then
-  jopt=-j8
-elif test $cpus -gt 4; then
-  jopt=-j4
-elif test $cpus -gt 2; then
-  jopt=-j2
 else
-  jopt=
+  jopt=-j$cpus
 fi
 
-targets="mongo mongod mongos"
-if ! echo $version |fgrep -q 4.0; then
-  targets="$targets mongocryptd"
+if echo $version |egrep -q '^r?4.4'; then
+  targets="install-mongo install-mongod install-mongos install-mongocryptd"
+else
+  targets="mongo mongod mongos"
+  if echo $version |egrep -q '^r?4.[24]'; then
+    targets="$targets mongocryptd"
+  fi
 fi
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
