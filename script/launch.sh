@@ -56,6 +56,9 @@ do_mlaunch() {
     if echo "$version" |grep -Eq '^(3.6|4)'; then
       params="$params --setParameter honorSystemUmask=true"
     fi
+    if echo "$version" |grep -Eq '^(4.[0])'; then
+      params="$params --networkMessageCompressors snappy,zlib"
+    fi
     if echo "$version" |grep -Eq '^(4.[24])'; then
       # ttlMonitorEnabled cannot be used when launching a sharded cluster.
       if ! echo "$0" |grep -q sharded; then
@@ -67,6 +70,7 @@ do_mlaunch() {
       # https://jira.mongodb.org/browse/DOCS-12806
       #params="$params --setParameter transactionLifetimeLimitSeconds=15"
       # also https://github.com/rueckstiess/mtools/issues/696
+      params="$params --networkMessageCompressors zstd,snappy,zlib"
     fi
     if ! echo "$launchargs" |grep -q enableTestCommands; then
       params="$params --setParameter enableTestCommands=1"
