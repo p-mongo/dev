@@ -58,7 +58,16 @@ else
 fi
 
 if echo $version |egrep -q '^r?4.0'; then
-  pip install --user -r buildscripts/requirements.txt
+  # https://jira.mongodb.org/browse/SERVER-49352
+  if test -n "$VIRTUAL_ENV"; then
+    if ! python -V 2>&1 |fgrep 'Python 2.7'; then
+      echo "4.0 server requires python 2.7" 1>&2
+      exit 1
+    fi
+    pip install -r buildscripts/requirements.txt
+  else
+    python2.7 -m pip install --user -r buildscripts/requirements.txt
+  fi
 elif echo $version |egrep -q '^r?4'; then
   pip3 install --user -r etc/pip/compile-requirements.txt
 else
