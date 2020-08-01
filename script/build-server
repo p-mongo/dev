@@ -89,17 +89,27 @@ else
     targets="$targets mongocryptd"
   fi
 fi
+
+# Linking each binary of the recent versions consumes gigabytes of ram.
+# With -j4 all binaries end up getting linked at the same time.
+# Build the binaries sequentially.
+do_build() {
+  for target in $targets; do
+    nice "$@" $target
+  done
+}
+
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
 if echo $version |egrep -q '^r?3.0'; then
   # Requires scons 2.3.
   # https://sourceforge.net/projects/scons/files/scons/2.3.6/
   # SSL does not build due to openssl incompatibility.
-  nice ~/.local/bin/scons --disable-warnings-as-errors $jopt $targets
+  do_build ~/.local/bin/scons --disable-warnings-as-errors $jopt
 elif echo $version |egrep -q '^r?3.2'; then
-  nice ./buildscripts/scons.py --disable-warnings-as-errors $jopt $targets
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt
 else
-  nice ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt $targets
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt
 fi
 
 for i in $targets; do
