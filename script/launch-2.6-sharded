@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/2.6-rs
+bindir=/usr/local/m/versions/2.6.12/bin
+port=12640
+launchargs="--replicaset --name tango --sharded 1 --mongos 2"
+
+do_mlaunch "$@"
