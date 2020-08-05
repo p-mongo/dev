@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+port = ARGV.shift.to_i
+
+unless port > 0
+  raise "Usage: mm <port>"
+end
+
+require 'mongo'
+
+Mongo::Logger.logger.level = Logger::WARN
+
+client = Mongo::Client.new(["localhost:#{port}"])
+
+cmd = "mongo mongodb://#{client.cluster.servers.map(&:address).map(&:seed).join(',')}/?replicaSet=#{client.cluster.replica_set_name}"
+puts cmd
+exec(cmd)
