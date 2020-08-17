@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.4-ocsp-rsa
+bindir=/usr/local/m/versions/4.4
+port=14491
+launchargs="--single --tlsMode requireTLS --tlsAllowInvalidCertificates \
+--tlsAllowConnectionsWithoutCertificates \
+--tlsCertificateKeyFile /home/w/apps/ruby-driver/.evergreen/ocsp/rsa/server.pem \
+--tlsCAFile /home/w/apps/ruby-driver/.evergreen/ocsp/rsa/ca.pem"
+
+do_mlaunch "$@"
