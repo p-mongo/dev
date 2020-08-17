@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+path = ARGV.shift
+
+data = JSON.parse(File.read(path))
+
+data['examples'][-20...-1].each do |example|
+  puts "#{example['id']} #{example['run_time']}"
+end
