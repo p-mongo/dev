@@ -142,12 +142,12 @@ end
 
 class DriverDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/ruby-driver'))
-  self.docs_repo_url = 'https://github.com/mongodb/docs-ruby'
+  self.docs_repo_url = 'https://github.com/p-mongodb/docs-unified'
   self.output_subdir = 'driver'
 end
 
 class MongoidDocsBuilder < DocsBuilder
   self.work_path = Pathname.new(File.expand_path('~/apps/mongoid'))
-  self.docs_repo_url = 'https://github.com/mongodb/docs-mongoid'
+  self.docs_repo_url = 'https://github.com/p-mongodb/docs-unified'
   self.output_subdir = 'mongoid'
 end
