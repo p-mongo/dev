@@ -8,6 +8,7 @@ dir="`dirname "$0"`"
 dbdir=/mnt/zram/mongodb/4.4-single
 bindir=/usr/local/m/versions/4.4
 port=14400
-launchargs="--single"
+launchargs="--single \
+--setParameter authenticationMechanisms=SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-AWS"
 
 do_mlaunch "$@"

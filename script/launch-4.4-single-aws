@@ -10,6 +10,6 @@ bindir=/usr/local/m/versions/4.4
 port=14401
 launchargs="--single \
 --setParameter authenticationMechanisms=SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-AWS \
---auth --user dev --password dev"
+--auth --user bootstrap --password bootstrap"
 
 do_mlaunch "$@"

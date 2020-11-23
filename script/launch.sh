@@ -19,6 +19,7 @@ do_mlaunch() {
   fi
   if test -f "$dbdir"/.mlaunch_startup; then
     if test "$1" = rm; then
+      mlaunch stop --dir "$dbdir"
       rm -rf "$dbdir"
       return
     elif test "$1" = restart; then
