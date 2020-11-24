@@ -107,7 +107,9 @@ if echo $version |egrep -q '^r?3.0'; then
   # SSL does not build due to openssl incompatibility.
   do_build ~/.local/bin/scons --disable-warnings-as-errors $jopt
 elif echo $version |egrep -q '^r?3.2'; then
-  do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt
+  # Requires gcc-8 and g++-8 installed on the system.
+  # SSL does not build due to openssl incompatibility.
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt CC=gcc-8 CXX=g++-8
 else
   do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt
 fi
