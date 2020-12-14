@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+path="$1"
+
+if test -z "$path"; then
+  echo "Usage: `basename $0` path-to-deployment"
+fi
+
+for f in `find "$path" -name '*.log'`; do
+  :>$f
+done
