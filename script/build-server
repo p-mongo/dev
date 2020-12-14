@@ -81,11 +81,11 @@ else
   jopt=-j$cpus
 fi
 
-if echo $version |egrep -q '^r?4.4'; then
+if echo $version |egrep -q '^r?4\.[47]'; then
   targets="install-mongo install-mongod install-mongos install-mongocryptd"
 else
   targets="mongo mongod mongos"
-  if echo $version |egrep -q '^r?4.[24]'; then
+  if echo $version |egrep -q '^r?4\.[247]'; then
     targets="$targets mongocryptd"
   fi
 fi
