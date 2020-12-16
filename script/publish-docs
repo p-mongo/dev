@@ -9,7 +9,7 @@ sub build {
     my ($project, $branch) = @_;
     
     check_call("git checkout $branch");
-    check_call("make publish deploy");
+    check_call("yes |make publish deploy || true");
 }
 
 sub check_call {
