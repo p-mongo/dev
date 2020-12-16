@@ -2,6 +2,8 @@
 
 set -e
 
+ulimit -n 200000
+
 dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
