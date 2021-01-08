@@ -2,6 +2,16 @@
 
 set -e
 
+if test "`id -u`" != 0; then
+  if which sudo 2>/dev/null 1>&2; then
+    echo "This needs to be run as root, trying sudo" 1>&2
+    exec sudo sh -x "$0" "$@"
+  else
+    echo "This needs to be run as root" 1>&2
+    exit 2
+  fi
+fi
+
 mem=`free --mega |grep Mem: |awk '{print $2}'`
 if test `expr $mem \> 30000` = 1; then
   size=100g
@@ -9,17 +19,24 @@ else
   size=50g
 fi
 
-sudo modprobe zram
+modprobe zram
 dev=`sudo zramctl -f -s $size`
 if ! echo "$dev" |grep -q ^/dev/zram; then
   echo "Bogus device $dev" 1>&2
   exit 3
 fi
-sudo mkfs.xfs "$dev"
-sudo mkdir -p /mnt/zram
-sudo mount "$dev" /mnt/zram
-sudo mkdir /mnt/zram/mongodb
-sudo chown m:m /mnt/zram/mongodb
 
-sudo mkdir /mnt/zram/sandbox
-sudo chown sandbox /mnt/zram/sandbox
+if which mkfs.xfs </dev/null 2>&1; then
+  mkfs.xfs "$dev"
+else
+  echo "mkfs.xfs not present - install xfsprogs? Using ext2 instead"
+  mkfs.ext2 "$dev"
+fi
+
+mkdir -p /mnt/zram
+mount "$dev" /mnt/zram
+mkdir /mnt/zram/mongodb
+chown m:m /mnt/zram/mongodb
+
+mkdir /mnt/zram/sandbox
+chown sandbox /mnt/zram/sandbox
