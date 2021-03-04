@@ -41,7 +41,8 @@ class DocsBuilder
       check_call(['sh', '-c', <<S], cwd: dr_work_path)
         git checkout master &&
         git fetch origin &&
-        git reset --hard origin/master
+        git reset --hard origin/master &&
+        git submodule update --init --recursive
 S
     else
       puts "Cloning docs git repo"
@@ -54,7 +55,8 @@ S
       check_call(['sh', '-c', <<S], cwd: cr_work_path)
         git checkout master &&
         git fetch origin &&
-        git reset --hard origin/master
+        git reset --hard origin/master &&
+        git submodule update --init --recursive
 S
     else
       puts "Cloning project git repo"
