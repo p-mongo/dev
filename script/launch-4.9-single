@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/4.9-single
+bindir=/usr/local/m/versions/4.9
+port=14900
+launchargs="--single \
+--setParameter authenticationMechanisms=SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-AWS \
+--setParameter acceptAPIVersion2=1"
+
+do_mlaunch "$@"
