@@ -8,6 +8,8 @@ if test -z "$ticket"; then
 fi
 if test $(basename $(pwd)) = mongoid; then
   project=MONGOID
+elif test $(basename $(pwd)) = astrolabe; then
+  project=DRIVERS
 else
   project=RUBY
 fi
