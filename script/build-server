@@ -114,7 +114,16 @@ else
   do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt
 fi
 
-for i in $targets; do
+if echo $version |egrep -q '^r?4\.[479]'; then
+  files="mongo mongod mongos mongocryptd"
+  strips=
+  for file in $files; do
+    strips="$strips build/install/bin/$file"
+  done
+else
+  strips=$targets
+fi
+for i in $strips; do
   strip $i
 done
 
