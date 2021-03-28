@@ -120,6 +120,12 @@ if echo $version |egrep -q '^r?4\.[479]'; then
   for file in $files; do
     strips="$strips build/install/bin/$file"
   done
+elif echo $version |egrep -q '^r?4\.[0]'; then
+  files="mongo mongod mongos"
+  strips=
+  for file in $files; do
+    strips="$strips build/opt/mongo/$file"
+  done
 else
   strips=$targets
 fi
