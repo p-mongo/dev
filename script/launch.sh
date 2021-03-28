@@ -21,6 +21,14 @@ do_mlaunch() {
     if test "$1" = rm; then
       mlaunch stop --dir "$dbdir"
       rm -rf "$dbdir"
+      for i in `seq 0 5`; do
+        p=`expr $port + $i`
+        pid=`lsof -iTCP:$p -t`
+        if test -n "$pid"; then
+          echo "Kill $pid for $p"
+          kill -9 "$pid" || true
+        fi
+      done
       return
     elif test "$1" = restart; then
       for f in `find "$dbdir" -name \*pid`; do
