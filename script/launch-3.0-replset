@@ -6,7 +6,7 @@ dir="`dirname "$0"`"
 . "$dir"/launch.sh
 
 dbdir=/mnt/zram/mongodb/3.0-rs
-bindir=/usr/local/m/versions/3.0.15/bin
+bindir=/usr/local/m/versions/3.0
 port=13020
 launchargs="--replicaset --name ruby-driver-rs"
 
