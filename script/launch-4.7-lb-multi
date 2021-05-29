@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Uses 14749
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+"$dir"/launch-4.7-sharded-multishard
+
+dbdir=/mnt/zram/mongodb/4.7-scm
+
+haproxy -D -f "$dir"/../config/lb/4.7-multi.conf -p "$dbdir"/haproxy-multi.pid
