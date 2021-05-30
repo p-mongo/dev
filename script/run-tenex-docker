@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e
+
+./script/build-production
+docker run -it --rm -v `pwd`/.config.docker:/etc/tenex:ro -p 8080:80 --network mongodb-net pmongo/tenex
+
