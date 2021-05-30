@@ -69,6 +69,7 @@ S
         git reset --hard origin/master
 S
     check_call(['rsync', '-av', '--delete', '--exclude', '.git',
+      '--exclude', 'spec', '--exclude', 'tmp', '--exclude', 'yard-docs',
       self.class.work_path.to_s + '/', cr_work_path])
     check_call(['sh', '-c', <<S], cwd: cr_work_path)
         git add . &&
