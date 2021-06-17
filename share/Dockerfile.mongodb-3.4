@@ -1,11 +1,9 @@
-FROM debian:8
+FROM debian:9
 
-RUN apt update
-
-RUN echo 'APT { Install-Recommends "false"; }' |tee /etc/apt/apt.conf.d/40-no-recommends
-
-RUN apt-get install -y gcc git
-RUN apt-get install -y ssh-client man
+RUN echo 'APT { Install-Recommends "false"; }' |tee /etc/apt/apt.conf.d/40-no-recommends && \
+  apt-get update && \
+  apt-get install -y gcc git ssh-client python \
+    g++ libsnmp-dev libsasl2-dev zlib1g-dev
 
 WORKDIR /app
 
@@ -20,4 +18,11 @@ RUN git config --global http.sslVerify false && \
 
 RUN mkdir -p /root/apps/exp && git clone https://github.com/mongodb/mongo /root/apps/exp/mongo
 
-RUN cd dev && ./script/build-server r3.4.24
+RUN apt-get -y install libssl-dev libcurl4-gnutls-dev libldap-dev libkrb5-dev
+
+RUN apt-get -y remove libsensors4
+
+COPY build-mongodb-3.4.sh /build-mongodb-3.4.sh
+ENTRYPOINT "/build-mongodb-3.4.sh"
+
+#RUN cd dev && ./script/build-server r3.4.24

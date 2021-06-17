@@ -132,8 +132,10 @@ elif test $iver -ge 40; then
 else
   strips=$targets
 fi
+mkdir -p bin
 for i in $strips; do
   strip $i
+  mv $i bin
 done
 
 if false; then

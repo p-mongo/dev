@@ -2,14 +2,21 @@
 
 set -e
 
+dest="$1"
+
+if test -z "$dest"; then
+  echo "Usage: `basename $0` dest-dir" 1>&2
+  exit 1
+fi
+
 base="`dirname "$0"`"
 
-tmpdir=`mktemp -d`
+docker build -f "$base"/../share/Dockerfile.mongodb-3.4 -t build-mongodb-3.4 "$base"/../share
 
-finish() {
-  rm -rf "$tmpdir"
-}
+# ssh-agent into docker container:
+# https://gist.github.com/d11wtq/8699521
 
-trap finish EXIT
-
-docker build -f "$base"/../share/Dockerfile.mongodb-3.4 "$tmpdir"
+docker run -it \
+  -v "$SSH_AUTH_SOCK":/ssh-agent:ro -e SSH_AUTH_SOCK=/ssh-agent \
+  -v "$dest":/root/apps/exp/mongo/bin \
+  build-mongodb-3.4
