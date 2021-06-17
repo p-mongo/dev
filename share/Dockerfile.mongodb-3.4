@@ -1,0 +1,23 @@
+FROM debian:8
+
+RUN apt update
+
+RUN echo 'APT { Install-Recommends "false"; }' |tee /etc/apt/apt.conf.d/40-no-recommends
+
+RUN apt-get install -y gcc git
+RUN apt-get install -y ssh-client man
+
+WORKDIR /app
+
+#ENV GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no' \
+#  GIT_SSH='ssh -o StrictHostKeyChecking=no'
+
+RUN mkdir $HOME/.ssh && echo StrictHostKeyChecking no |tee $HOME/.ssh/config
+
+#RUN git clone git@github.com:p-mongo/dev
+RUN git config --global http.sslVerify false && \
+  git clone https://github.com/p-mongo/dev
+
+RUN mkdir -p /root/apps/exp && git clone https://github.com/mongodb/mongo /root/apps/exp/mongo
+
+RUN cd dev && ./script/build-server r3.4.24

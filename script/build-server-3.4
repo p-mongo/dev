@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+base="`dirname "$0"`"
+
+tmpdir=`mktemp -d`
+
+finish() {
+  rm -rf "$tmpdir"
+}
+
+trap finish EXIT
+
+docker build -f "$base"/../share/Dockerfile.mongodb-3.4 "$tmpdir"
