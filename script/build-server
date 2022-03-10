@@ -41,6 +41,7 @@ fi
 iver=`echo $version |tr -d a-z. |cut -c 1-2`
 echo $iver
 
+if false;then
 if test -d ~/apps/exp/mongo-enterprise-modules; then
   (cd ~/apps/exp/mongo-enterprise-modules && git fetch origin)
 else
@@ -58,6 +59,7 @@ if test $iver = 32; then
 else
   mkdir -p src/mongo/db/modules/
   ln -sf ~/apps/exp/mongo-enterprise-modules src/mongo/db/modules/enterprise
+fi
 fi
 
 if test $iver = 40; then
@@ -114,7 +116,7 @@ elif test $iver = 32; then
   # SSL does not build due to openssl incompatibility.
   do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt CC=gcc-8 CXX=g++-8
 else
-  do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt CC=gcc-10 CXX=g++-10
 fi
 
 if test $iver -ge 44; then
