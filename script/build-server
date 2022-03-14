@@ -12,6 +12,18 @@ set -e
 # apt-get install gcc-8 g++-8 python3-pip libssl-dev libcurl4-openssl-dev \
 #   libsnmp-dev libsasl2-dev libcurl4-gnutls-dev libldap2-dev libkrb5-dev
 
+community=false
+
+while getopts :c Option; do
+  case $Option in
+    c)
+      community=true;;
+    *)
+      echo Bad usage 1>&2
+      exit 1
+  esac
+done
+
 if ! test -d ~/apps/exp/mongo; then
   mkdir -p ~/apps/exp
   git clone https://github.com/mongodb/mongo ~/apps/exp/mongo
@@ -41,25 +53,25 @@ fi
 iver=`echo $version |tr -d a-z. |cut -c 1-2`
 echo $iver
 
-if false;then
-if test -d ~/apps/exp/mongo-enterprise-modules; then
-  (cd ~/apps/exp/mongo-enterprise-modules && git fetch origin)
-else
-  git clone git@github.com:10gen/mongo-enterprise-modules ~/apps/exp/mongo-enterprise-modules
-fi
+if ! $community; then
+  if test -d ~/apps/exp/mongo-enterprise-modules; then
+    (cd ~/apps/exp/mongo-enterprise-modules && git fetch origin)
+  else
+    git clone git@github.com:10gen/mongo-enterprise-modules ~/apps/exp/mongo-enterprise-modules
+  fi
 
-(cd ~/apps/exp/mongo-enterprise-modules &&
-git checkout $branch)
+  (cd ~/apps/exp/mongo-enterprise-modules &&
+  git checkout $branch)
 
-git checkout $branch
+  git checkout $branch
 
-# On 3.2 enterprise build requires ssl, but ssl requriements are too old.
-if test $iver = 32; then
-  rm -rf src/mongo/db/modules/
-else
-  mkdir -p src/mongo/db/modules/
-  ln -sf ~/apps/exp/mongo-enterprise-modules src/mongo/db/modules/enterprise
-fi
+  # On 3.2 enterprise build requires ssl, but ssl requriements are too old.
+  if test $iver = 32; then
+    rm -rf src/mongo/db/modules/
+  else
+    mkdir -p src/mongo/db/modules/
+    ln -sf ~/apps/exp/mongo-enterprise-modules src/mongo/db/modules/enterprise
+  fi
 fi
 
 if test $iver = 40; then
@@ -87,10 +99,13 @@ else
 fi
 
 if test $iver -ge 44; then
-  targets="install-mongo install-mongod install-mongos install-mongocryptd"
+  targets="install-mongo install-mongod install-mongos"
+  if ! $community; then
+    targets="$targets install-mongocryptd"
+  fi
 else
   targets="mongo mongod mongos"
-  if test $iver -ge 42; then
+  if ! $community && test $iver -ge 42; then
     targets="$targets mongocryptd"
   fi
 fi
@@ -104,19 +119,39 @@ do_build() {
   done
 }
 
+opts=
+if test $iver -ge 40; then
+  opts="$opts --jlink=1"
+fi
+
+if test $iver -ge 50; then
+  # Make the server run on 1st gen Core CPUs as found in x201/x201s
+  opts="$opts --experimental-optimization=-sandybridge"
+fi
+
+if $community; then
+  if test $iver -ge 40; then
+    opts="$opts --enable-free-mon=off --enable-http-client=off"
+  fi
+
+  if test $iver -ge 42; then
+    opts="$opts --enable-http-client=off"
+  fi
+fi
+
 # mongo mongobridge mongod mongos
 # requires python2 on 4.0 and python3 on 4.2
 if test $iver = 30; then
   # Requires scons 2.3.
   # https://sourceforge.net/projects/scons/files/scons/2.3.6/
   # SSL does not build due to openssl incompatibility.
-  do_build ~/.local/bin/scons --disable-warnings-as-errors $jopt
+  do_build ~/.local/bin/scons --disable-warnings-as-errors $jopt $opts
 elif test $iver = 32; then
   # Requires gcc-8 and g++-8 installed on the system.
   # SSL does not build due to openssl incompatibility.
-  do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt CC=gcc-8 CXX=g++-8
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors $jopt $opts CC=gcc-8 CXX=g++-8
 else
-  do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt CC=gcc-10 CXX=g++-10
+  do_build ./buildscripts/scons.py --disable-warnings-as-errors --ssl $jopt $opts CC=gcc-10 CXX=g++-10
 fi
 
 if test $iver -ge 44; then
@@ -141,13 +176,13 @@ for i in $strips; do
 done
 
 if false; then
-subdir=`echo $branch |sed -e s/^v//`
-if test $subdir = master; then
-  subdir=5.0
-fi
+  subdir=`echo $branch |sed -e s/^v//`
+  if test $subdir = master; then
+    subdir=5.0
+  fi
 
-rsync -av ~/debs/mongo/$subdir/ ~/debs/mongo/$subdir-prev
-rm -r ~/debs/mongo/$subdir/
-mkdir ~/debs/mongo/$subdir/
-cp mongo* ~/debs/mongo/$subdir/
+  rsync -av ~/debs/mongo/$subdir/ ~/debs/mongo/$subdir-prev
+  rm -r ~/debs/mongo/$subdir/
+  mkdir ~/debs/mongo/$subdir/
+  cp mongo* ~/debs/mongo/$subdir/
 fi
