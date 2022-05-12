@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+dir="`dirname "$0"`"
+. "$dir"/launch.sh
+
+dbdir=/mnt/zram/mongodb/6.0-rs
+bindir=/usr/local/m/versions/6.0
+port=16020
+launchargs="--replicaset --name ruby-driver-rs --arbiter"
+
+do_mlaunch "$@"
