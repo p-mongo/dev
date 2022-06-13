@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+dir=/mnt/zram/mongodb/mcd
+
+mkdir -p $dir
+/usr/local/m/versions/6.0/mongocryptd --fork \
+  --logpath $dir/mcd.log --pidfilepath $dir/mcd.pid
+
