@@ -38,7 +38,7 @@ do_mlaunch() {
         ps awwxu |grep $kill_port |awk '{print $2}' |xargs kill -9 2>/dev/null || true
       done
       mlaunch start --dir "$dbdir"
-    elif test -n "$1"; then
+    elif test -n "$1" && ! echo "$1" |grep -q ^-; then
       cmd="$1"
       shift
       mlaunch $cmd --dir "$dbdir" "$@"
