@@ -13,11 +13,16 @@ set -e
 #   libsnmp-dev libsasl2-dev libcurl4-gnutls-dev libldap2-dev libkrb5-dev
 
 community=false
+resume=false
 
-while getopts :c Option; do
+while getopts :cr Option; do
   case $Option in
     c)
-      community=true;;
+      community=true
+      shift;;
+    r)
+      resume=true
+      shift;;
     *)
       echo Bad usage 1>&2
       exit 1
@@ -31,7 +36,9 @@ else
   (cd ~/apps/exp/mongo && git fetch origin)
 fi
 cd ~/apps/exp/mongo
-rm -rf build
+if ! $resume; then
+  rm -rf build
+fi
 
 version="$1"
 if test -z "$version" || test "$version" = master; then
@@ -60,10 +67,12 @@ if ! $community; then
     git clone git@github.com:10gen/mongo-enterprise-modules ~/apps/exp/mongo-enterprise-modules
   fi
 
-  (cd ~/apps/exp/mongo-enterprise-modules &&
-  git checkout $branch)
+  if ! $resume; then
+    (cd ~/apps/exp/mongo-enterprise-modules &&
+    git checkout $branch)
 
-  git checkout $branch
+    git checkout $branch
+  fi
 
   # On 3.2 enterprise build requires ssl, but ssl requriements are too old.
   if test $iver = 32; then
