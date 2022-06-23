@@ -56,28 +56,28 @@ do_mlaunch() {
     fi
   else
     if test `basename "$bindir"` = bin; then
-      version=$(basename $(dirname "$bindir"))
+      version=$(basename $(dirname "$bindir") |tr -d .)
     else
-      version=$(basename "$bindir")
+      version=$(basename "$bindir" |tr -d .)
     fi
     params=
-    if echo "$version" |grep -Eq '^(3.[246]|4)'; then
+    if test $version -ge 32; then
       params="$params --setParameter diagnosticDataCollectionEnabled=false"
     fi
     if ! echo "$launchargs" |grep -q -- --wiredTigerCacheSizeGB; then
-      if echo "$version" |grep -Eq '^(3.[46]|4)'; then
+      if test $version -ge 34; then
         params="$params --wiredTigerCacheSizeGB 0.25"
-      elif echo "$version" |grep -Eq '^3'; then
+      elif test $version -ge 30; then
         params="$params --wiredTigerCacheSizeGB 1"
       fi
     fi
-    if echo "$version" |grep -Eq '^(3.6|4)'; then
+    if test $version -ge 36; then
       params="$params --setParameter honorSystemUmask=true"
     fi
-    if echo "$version" |grep -Eq '^(4.[0])'; then
+    if test $version -eq 40; then
       params="$params --networkMessageCompressors snappy,zlib"
     fi
-    if echo "$version" |grep -Eq '^(4.[24])'; then
+    if test $version -ge 42; then
       # ttlMonitorEnabled cannot be used when launching a sharded cluster.
       if ! echo "$0" |grep -q sharded; then
         params="$params --setParameter ttlMonitorEnabled=false"
