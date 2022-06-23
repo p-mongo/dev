@@ -10,8 +10,17 @@ announce() {
   eval "$@"
 }
 
+fix_dbdir_perms() {
+  if test -d "$dbdir"; then
+    echo "Setting permissions on $dbdir to wide open"
+    chmod -R go+rwX "$dbdir"
+  fi
+}
+
 do_mlaunch() {
   echo "Base port: $port"
+  
+  trap fix_dbdir_perms EXIT
   
   # 1024 was insufficient with retry reads on by default
   if test `ulimit -n` -le 4010; then
@@ -89,8 +98,6 @@ do_mlaunch() {
       --filePermissions 0666 \
       --binarypath $bindir --port $port "$@"
   fi
-  
-  chmod -R go+rwX "$dbdir"
 }
 
 # --maxConns 200
